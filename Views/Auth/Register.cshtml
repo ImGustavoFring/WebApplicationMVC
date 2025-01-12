@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="form-container">
+    <h2>Регистрация</h2>
+    <form method="post" class="mt-4">
+        @if (!String.IsNullOrEmpty(ViewData["ErrorMessage"] as string))
+        {
+            <div class="alert alert-danger">
+                @ViewData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="mb-3 w-100">
+            <label for="login" class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="login" name="login" placeholder="Пример: ivanov123" required>
+        </div>
+
+        <div class="mb-3 w-100">
+            <label for="email" class="form-label">Электронная почта</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="example@mail.com" required>
+        </div>
+
+        <div class="mb-3 w-100">
+            <label for="password" class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Введите пароль" required>
+        </div>
+
+        <div class="mb-3 w-100">
+            <label for="confirmedPassword" class="form-label">Подтвердите пароль</label>
+            <input type="password" class="form-control" id="confirmedPassword" name="confirmedPassword" placeholder="Повторите пароль" required>
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </div>
+    </form>
+
+    <div class="form-footer">
+        <p>Уже есть аккаунт? <a href="/Auth/Login">Войдите</a></p>
+    </div>
+</div>

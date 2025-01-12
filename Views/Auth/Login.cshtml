@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="form-container">
+    <h2>Вход</h2>
+    <form method="post" class="mt-4">
+        @if (!String.IsNullOrEmpty(ViewData["ErrorMessage"] as string))
+        {
+            <div class="alert alert-danger">
+                @ViewData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="mb-3 w-100">
+            <label for="username" class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Введите имя пользователя" required>
+        </div>
+
+        <div class="mb-3 w-100">
+            <label for="password" class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Введите пароль" required>
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </div>
+    </form>
+
+    <div class="form-footer">
+        <p>Нет аккаунта? <a href="/Auth/Register">Зарегистрируйтесь</a></p>
+    </div>
+</div>
