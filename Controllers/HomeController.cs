@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApplicationMVC.Data;
 
 namespace WebApplicationMVC.Controllers
 {
+    [Authorize(Policy = "UserPolicy")]
     [Route("Home")]
     public class HomeController : Controller
     {

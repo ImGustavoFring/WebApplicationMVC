@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>User Details</h2>
+
+<div>
+    <p><strong>Username:</strong> @Model.Username</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Role:</strong> @Model.Role.Name</p>
+    <p><strong>Bio:</strong> @Model.Bio</p>
+    <p><strong>Contact Info:</strong> @Model.Contactinfo</p>
+    <p><strong>Avatar URL:</strong> <a href="@Model.Avatarurl">@Model.Avatarurl</a></p>
+    <p><strong>Created At:</strong> @Model.Createdat</p>
+    <p><strong>Updated At:</strong> @Model.Updatedat</p>
+</div>
+<a asp-action="Edit" asp-route-userId="@Model.Id">Edit</a>
