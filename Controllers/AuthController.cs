@@ -38,7 +38,8 @@ namespace WebApplicationMVC.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role.Name)
+                    new Claim(ClaimTypes.Role, user.Role.Name),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
@@ -73,7 +74,7 @@ namespace WebApplicationMVC.Controllers
                 return View();
             }
 
-            var role = _context.Roles.FirstOrDefault(r => r.Name == "User"); 
+            var role = _context.Roles.FirstOrDefault(r => r.Name == "User");
 
             if (role == null)
             {
@@ -92,18 +93,7 @@ namespace WebApplicationMVC.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.Name)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
         [HttpPost("Logout")]

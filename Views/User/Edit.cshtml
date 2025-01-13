@@ -16,44 +16,43 @@
 
                 <div class="mb-3">
                     <label asp-for="Username" class="form-label"><strong>Логин:</strong></label>
-                    <input asp-for="Username" class="form-control" placeholder="Введите логин" value="@Model.Username" required />
-                    <span asp-validation-for="Username" class="text-danger"></span>
+                    <input name="Username" class="form-control" placeholder="Введите логин" value="@Model.Username" required />
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Email" class="form-label"><strong>Электронная почта:</strong></label>
-                    <input asp-for="Email" type="email" class="form-control" placeholder="Введите email" value="@Model.Email" required />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <input name="Email" type="email" class="form-control" placeholder="Введите email" value="@Model.Email" required />
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Fullname" class="form-label"><strong>Полное имя:</strong></label>
-                    <input asp-for="Fullname" class="form-control" placeholder="Введите полное имя" value="@Model.Fullname" />
-                    <span asp-validation-for="Fullname" class="text-danger"></span>
+                    <input name="Fullname" class="form-control" placeholder="Введите полное имя" value="@Model.Fullname" />
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Bio" class="form-label"><strong>О себе:</strong></label>
-                    <textarea asp-for="Bio" class="form-control" placeholder="Введите информацию о себе">@Model.Bio</textarea>
-                    <span asp-validation-for="Bio" class="text-danger"></span>
+                    <textarea name="Bio" class="form-control" placeholder="Введите информацию о себе">@Model.Bio</textarea>
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Contactinfo" class="form-label"><strong>Контактная информация:</strong></label>
-                    <input asp-for="Contactinfo" class="form-control" placeholder="Введите контактные данные" value="@Model.Contactinfo" />
-                    <span asp-validation-for="Contactinfo" class="text-danger"></span>
+                    <input name="Contactinfo" class="form-control" placeholder="Введите контактные данные" value="@Model.Contactinfo" />
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Роль:</strong></label>
                     <select name="RoleName" class="form-select" required>
-                        <option value="">Выберите роль</option>
                         @foreach (var role in ViewBag.Roles as List<string>)
                         {
                             <option value="@role" @(role == Model.Role?.Name ? "selected" : "")>@role</option>
                         }
                     </select>
-                    <span asp-validation-for="Roleid" class="text-danger"></span>
+                    <span class="text-danger"></span>
                 </div>
 
                 <div class="d-grid gap-2">

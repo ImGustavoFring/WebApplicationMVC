@@ -1,4 +1,53 @@
-﻿@page
-@model WebApplicationMVC.Views.Article.EditModel
+﻿@model WebApplicationMVC.Models.Article
+
 @{
+    ViewData["Title"] = "Редактирование статьи";
+    Layout = "_Layout";
 }
+
+<div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+            <h2>Редактирование статьи</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="Edit" asp-controller="Article">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"><strong>Название статьи:</strong></label>
+                    <input name="Title" class="form-control" placeholder="Введите название статьи" value="@Model.Title" required />
+                    <span class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Content" class="form-label"><strong>Содержание:</strong></label>
+                    <textarea name="Content" class="form-control" placeholder="Введите текст статьи">@Model.Content</textarea>
+                    <span class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Видимость:</strong></label>
+                    <select name="Visibilityid" class="form-select" required>
+                        @foreach (var visibility in ViewBag.VisibilityOptions as List<string>)
+                        {
+                            <option value="@visibility" @(visibility == Model.Visibility.Name ? "selected" : "")>@visibility</option>
+                        }
+                    </select>
+                    <span class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Теги:</strong></label>
+                    <input name="tagNames" class="form-control" placeholder="Введите теги через запятую" value="@string.Join(", ", Model.Tags.Select(t => t.Name))" />
+                    <span class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                    <a href="@Url.Action("Details", "Article", new { id = Model.Id })" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,99 +1,123 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using WebApplicationMVC.Data;
 using WebApplicationMVC.Models;
 
-namespace WebApplicationMVC.Controllers
+[Authorize(Policy = "UserPolicy")]
+[Route("User")]
+public class UserController : Controller
 {
-    [Authorize(Policy = "UserPolicy")]
-    [Route("User")]
-    public class UserController : Controller
+    private readonly ApplicationDbContext _context;
+
+    public UserController(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public UserController(ApplicationDbContext context)
+    [HttpGet("Details/{id?}")]
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (!id.HasValue)
         {
-            _context = context;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
         }
 
-        [HttpGet("Details/{id}")]
-        public async Task<IActionResult> Details(int id)
+        var user = await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null)
         {
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
+            return NotFound();
         }
 
-        [HttpGet("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+        return View(user);
+    }
 
-            // Загружаем список ролей в виде строк (названий)
+    [HttpGet("Edit/{id?}")]
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (!id.HasValue)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
+        }
+
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        if (id != currentUserId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
+        ViewBag.Roles = roles;
+
+        return View(user);
+    }
+
+    [HttpPost("Edit/{id?}")]
+    public async Task<IActionResult> Edit(int? id, string RoleName, string Username, string Email, string Fullname, string Bio, string Contactinfo, string Avatarurl)
+    {
+        if (!id.HasValue)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
+        }
+
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        if (id != currentUserId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var existingUser = await _context.Users.FindAsync(id);
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        existingUser.Username = Username;
+        existingUser.Email = Email;
+        existingUser.Fullname = Fullname;
+        existingUser.Bio = Bio;
+        existingUser.Contactinfo = Contactinfo;
+        existingUser.Avatarurl = Avatarurl;
+
+        var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleName);
+        if (role == null)
+        {
+            ModelState.AddModelError("RoleName", "Невалидная роль.");
             var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
             ViewBag.Roles = roles;
-
-            return View(user);
+            return View(existingUser);
         }
 
-        [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id, string RoleName, [Bind("Id,Username,Email,Fullname,Bio,Contactinfo,Avatarurl")] User user)
-        {
-            // Очистим любые старые ошибки в ModelState
-            ModelState.Clear();
+        existingUser.Roleid = role.Id;
+        await _context.SaveChangesAsync();
 
-            if (!ModelState.IsValid)
-            {
-                // Загружаем список ролей заново, если форма не прошла валидацию
-                var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
-                ViewBag.Roles = roles;
-                return View(user);
-            }
-
-            var existingUser = await _context.Users.FindAsync(id);
-
-            if (existingUser == null)
-            {
-                return NotFound();
-            }
-
-            // Обновляем данные пользователя
-            existingUser.Username = user.Username;
-            existingUser.Email = user.Email;
-            existingUser.Fullname = user.Fullname;
-            existingUser.Bio = user.Bio;
-            existingUser.Contactinfo = user.Contactinfo;
-
-            // Проверяем роль по имени
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleName);
-            if (role == null)
-            {
-                // Если роль не найдена, возвращаем ошибку
-                ModelState.AddModelError("RoleName", "Невалидная роль.");
-                var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
-                ViewBag.Roles = roles;
-                return View(user);
-            }
-
-            existingUser.Roleid = role.Id; // Устанавливаем ID роли
-            existingUser.Avatarurl = user.Avatarurl;
-
-            // Сохраняем изменения
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Details), new { id = user.Id });
-        }
+        return RedirectToAction(nameof(Details), new { id = existingUser.Id });
     }
 }

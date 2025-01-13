@@ -1,4 +1,44 @@
 ﻿@{
     Layout = "_Layout";
+    ViewData["Title"] = "Главная страница";
 }
-<h2>Welcome!</h2>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Последние статьи</h2>
+
+    <!-- Список тегов -->
+    <div class="mb-4">
+        <h4>Теги</h4>
+        <div class="d-flex flex-wrap">
+            @foreach (var tag in ViewBag.Tags as List<WebApplicationMVC.Models.Tag>)
+            {
+                <span class="badge bg-primary me-2 mb-2">@tag.Name</span>
+            }
+        </div>
+    </div>
+
+    <!-- Список статей -->
+    <div class="row">
+        @foreach (var article in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    @if (!string.IsNullOrEmpty(article.Previewurl))
+                    {
+                        <img src="@article.Previewurl" class="card-img-top" alt="Preview image">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@article.Title</h5>
+                        <p class="card-text">
+                            @Html.Raw(article.Content.Length > 100 ? article.Content.Substring(0, 100) + "..." : article.Content)
+                        </p>
+                        <a href="#" class="btn btn-primary">Читать дальше</a>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Автор: @article.User.Fullname
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

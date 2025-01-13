@@ -1,4 +1,68 @@
-﻿@page
-@model WebApplicationMVC.Views.Article.DetailsModel
+﻿@model WebApplicationMVC.Models.Article
+
 @{
+    ViewData["Title"] = "Детали статьи";
+    Layout = "_Layout";
 }
+
+<div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
+    <div class="card">
+        <div class="card-header">
+            <h2>@Model.Title</h2>
+            <p><strong>Автор:</strong> @Model.User?.Username</p>
+            <p><strong>Дата создания:</strong> @Model.Createdat.ToString("yyyy-MM-dd HH:mm")</p>
+            @if (Model.Updatedat.HasValue)
+            {
+                <p><strong>Последнее обновление:</strong> @Model.Updatedat.Value.ToString("yyyy-MM-dd HH:mm")</p>
+            }
+        </div>
+        <div class="card-body">
+            <p><strong>Содержание:</strong> @Model.Content</p>
+
+            <p><strong>Видимость:</strong> @Model.Visibility?.Name</p>
+
+            <p><strong>Теги:</strong></p>
+            <ul>
+                @foreach (var tag in Model.Tags.ToList())
+                {
+                    <li>@tag.Name</li>
+                }
+            </ul>
+
+            <p><strong>Количество просмотров:</strong> @(Model.Views?.Count ?? 0)</p>
+
+            @if (Model.Ratings?.Any() == true)
+            {
+                <p><strong>Средняя оценка:</strong> @(Model.Ratings.Average(r => r.Value).ToString("F1"))</p>
+            }
+            else
+            {
+                <p><strong>Средняя оценка:</strong> Нет оценок</p>
+            }
+
+            <h3>Комментарии</h3>
+            <div>
+                @foreach (var comment in Model.Comments.OrderBy(c => c.Createdat))
+                {
+                    <div class="border p-3 mb-3">
+                        <p><strong>@comment.User?.Username</strong> (Дата: @comment.Createdat.ToString("yyyy-MM-dd HH:mm"))</p>
+                        <p>@comment.Content</p>
+                    </div>
+                }
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <h4>Добавить комментарий</h4>
+                    <form method="post" asp-action="AddComment" asp-route-id="@Model.Id">
+                        <textarea name="commentContent" class="form-control" placeholder="Ваш комментарий" required></textarea>
+                        <button type="submit" class="btn btn-primary mt-3">Отправить</button>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-warning">Редактировать</a>
+            <a href="@Url.Action("Index", "Article")" class="btn btn-secondary">Назад</a>
+        </div>
+    </div>
+</div>
