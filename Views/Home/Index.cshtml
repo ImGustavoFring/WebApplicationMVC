@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = "_Layout";
+    Layout = "_MainLayout";
     ViewData["Title"] = "Главная страница";
 }
 
@@ -17,26 +17,25 @@
         </div>
     </div>
 
-    <!-- Список статей -->
-    <div class="row">
+    <!-- Список статей (вертикальное отображение) -->
+    <div class="list-group">
         @foreach (var article in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card">
+            <div class="list-group-item mb-3">
+                <div class="d-flex flex-column">
+                    <!-- Превью изображения статьи -->
                     @if (!string.IsNullOrEmpty(article.Previewurl))
                     {
-                        <img src="@article.Previewurl" class="card-img-top" alt="Preview image">
+                        <img src="@article.Previewurl" class="img-fluid mb-3" alt="Preview image">
                     }
-                    <div class="card-body">
-                        <h5 class="card-title">@article.Title</h5>
-                        <p class="card-text">
-                            @Html.Raw(article.Content.Length > 100 ? article.Content.Substring(0, 100) + "..." : article.Content)
-                        </p>
-                        <a href="#" class="btn btn-primary">Читать дальше</a>
-                    </div>
-                    <div class="card-footer text-muted">
-                        Автор: @article.User.Fullname
-                    </div>
+                    <h5 class="mb-2">@article.Title</h5>
+                    <p>
+                        @Html.Raw(article.Content.Length > 100 ? article.Content.Substring(0, 100) + "..." : article.Content)
+                    </p>
+                    <a href="@Url.Action("Details", "Article", new { id = article.Id })" class="btn btn-secondary btn-sm">Читать дальше</a>
+                </div>
+                <div class="card-footer text-muted mt-2">
+                    Автор: @article.User.Fullname
                 </div>
             </div>
         }

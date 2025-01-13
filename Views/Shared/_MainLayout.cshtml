@@ -11,7 +11,7 @@
             color: #ffffff;
             height: 10vh;
             display: flex;
-            justify-content: space-between; /* Разделение на левую и правую части */
+            justify-content: space-between;
             align-items: center;
             padding: 0 20px;
         }
@@ -30,15 +30,15 @@
             align-items: center;
         }
 
-            .header-right a {
-                color: #ffffff;
-                text-decoration: none;
-                margin-left: 20px;
-            }
+        .search-input {
+            height: 35px;
+            width: 200px;
+            margin-right: 10px;
+        }
 
-                .header-right a:hover {
-                    color: #bdc3c7;
-                }
+        .btn-search {
+            height: 35px;
+        }
 
         main {
             background-color: #ffffff;
@@ -48,6 +48,16 @@
             align-items: center;
             height: 90vh;
         }
+
+        a {
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+            a:hover {
+                color: #bdc3c7;
+            }
 
         .form-container {
             background-color: #f8f9fa;
@@ -89,9 +99,14 @@
         <header class="py-3">
             <div class="header-left">
                 <h1><a href="@Url.Action("Index", "Home")">Computer World</a></h1>
+                <!-- Поле поиска -->
+                <input type="text" class="form-control search-input" placeholder="Поиск...">
+                <button class="btn btn-secondary btn-search">Найти</button>
             </div>
             <div class="header-right">
-                <a href="/About">О нас</a> <!-- Добавлена ссылка "О нас" -->
+                <!-- Ссылки -->
+                <a href="@Url.Action("Create", "Article")">Написать статью</a>
+                <a href="@Url.Action("Details", "User")">Профиль</a>
             </div>
         </header>
 

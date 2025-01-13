@@ -1,0 +1,38 @@
+﻿@model IEnumerable<WebApplicationMVC.Models.Subscription>
+
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "Подписчики пользователя";
+}
+
+<div class="container mt-5">
+    <h2>Подписчики пользователя</h2>
+    @if (!Model.Any())
+    {
+            <p>У пользователя нет подписчиков.</p>
+    }
+    else
+    {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Подписчик</th>
+                        <th>Дата подписки</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var subscription in Model)
+                {
+                            <tr>
+                                <td>@subscription.Subscriber.Fullname</td>
+                                <td>@subscription.Createdat.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "User", new { id = subscription.Subscriber.Id })" class="btn btn-link">Просмотр профиля</a>
+                                </td>
+                            </tr>
+                }
+                </tbody>
+            </table>
+    }
+</div>

@@ -1,48 +1,46 @@
-﻿@using WebApplicationMVC.Models
-@model WebApplicationMVC.Models.Article
+﻿@model WebApplicationMVC.Models.Article
+
+@using WebApplicationMVC.Models;
 
 @{
-    ViewData["Title"] = "Create Article";
-    Layout = "_Layout";
+    ViewData["Title"] = "Создание статьи";
+    Layout = "_MainLayout";
 }
 
-<div class="container mt-5">
-    <h2>Create Article</h2>
-    <form asp-action="Create" method="post">
-        <div class="form-container">
-            <!-- Title Field -->
+<div class="container">
+    <div class="form-container">
+        <h2>Создание статьи</h2>
+        <form asp-action="Create" method="post">
             <div class="mb-3">
-                <label asp-for="Title" class="form-label">Title</label>
-                <input asp-for="Title" class="form-control" placeholder="Enter article title" />
+                <label asp-for="Title" class="form-label">Заголовок</label>
+                <input type="text" name="title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
-            <!-- Content Field -->
             <div class="mb-3">
-                <label asp-for="Content" class="form-label">Content</label>
-                <textarea asp-for="Content" class="form-control" rows="6" placeholder="Write your article content here"></textarea>
+                <label asp-for="Content" class="form-label">Содержание</label>
+                <textarea name="content" class="form-control"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
 
-            <!-- Visibility Field -->
             <div class="mb-3">
-                <label class="form-label">Visibility</label>
-                <select asp-for="Visibilityid" class="form-select" asp-items="@(new SelectList(ViewBag.VisibilityOptions ?? new List<Visibility>(), "Id", "Name"))">
-                    <option value="">Select visibility</option>
+                <label asp-for="VisibilityId" class="form-label">Видимость</label>
+                <select name="visibilityId" class="form-select">
+                    @foreach (var visibility in ViewBag.VisibilityOptions as List<Visibility>)
+                    {
+                        <option value="@visibility.Id">@visibility.Name</option>
+                    }
                 </select>
+                <span asp-validation-for="VisibilityId" class="text-danger"></span>
             </div>
 
-            <!-- Tags Field -->
             <div class="mb-3">
-                <label class="form-label">Tags</label>
-                <input type="text" name="tagNames" class="form-control" placeholder="Enter tags separated by commas" />
-                <span class="form-text">Add tags to help categorize your article</span>
+                <label class="form-label">Теги</label>
+                <input type="text" name="tagNames" class="form-control" placeholder="Введите теги, разделяя их запятыми" />
+                <span class="form-text">Добавьте теги для классификации вашей статьи</span>
             </div>
 
-            <!-- Submit Button -->
-            <div class="btn-container">
-                <button type="submit" class="btn btn-primary">Create Article</button>
-            </div>
-        </div>
-    </form>
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </form>
+    </div>
 </div>

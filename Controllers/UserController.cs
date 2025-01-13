@@ -120,4 +120,67 @@ public class UserController : Controller
 
         return RedirectToAction(nameof(Details), new { id = existingUser.Id });
     }
+
+
+    [HttpGet("Articles/{id?}")]
+    public async Task<IActionResult> Articles(int? id)
+    {
+        if (!id.HasValue)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
+        }
+
+        var articles = await _context.Articles
+            .Where(a => a.Userid == id)
+            .ToListAsync();
+
+        return View(articles);
+    }
+
+    [HttpGet("Subscriptions/{id?}")]
+    public async Task<IActionResult> Subscriptions(int? id)
+    {
+        if (!id.HasValue)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
+        }
+
+        var subscriptions = await _context.Subscriptions
+            .Where(s => s.Subscriberid == id)
+            .Include(s => s.Author)
+            .ToListAsync();
+
+        return View(subscriptions);
+    }
+
+    [HttpGet("Subscribers/{id?}")]
+    public async Task<IActionResult> Subscribers(int? id)
+    {
+        if (!id.HasValue)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || !int.TryParse(userId, out int parsedId))
+            {
+                return Unauthorized();
+            }
+            id = parsedId;
+        }
+
+        var subscribers = await _context.Subscriptions
+            .Where(s => s.Authorid == id)
+            .Include(s => s.Subscriber)
+            .ToListAsync();
+
+        return View(subscribers);
+    }
 }

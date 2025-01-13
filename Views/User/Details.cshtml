@@ -1,7 +1,7 @@
 ﻿@model WebApplicationMVC.Models.User
 
 @{
-    Layout = "_Layout";
+    Layout = "_MainLayout";
     ViewData["Title"] = "Детали пользователя";
 }
 
@@ -14,7 +14,7 @@
             <p><strong>Логин:</strong> @Model.Username</p>
             <p><strong>Электронная почта:</strong> @Model.Email</p>
             <p><strong>Полное имя:</strong> @Model.Fullname</p>
-            <p><strong>О себе:</strong> @(Model.Bio ?? "Биография отсутствует")</p>
+            <p><strong>О себе:</strong> @(Model.Bio ?? "Информация отсутствует")</p>
             <p><strong>Контактная информация:</strong> @(Model.Contactinfo ?? "Контактная информация отсутствует")</p>
             <p><strong>Роль:</strong> @(Model.Role?.Name ?? "Роль не назначена")</p>
             <p><strong>Дата создания аккаунта:</strong> @Model.Createdat.ToString("yyyy-MM-dd HH:mm")</p>
@@ -24,7 +24,19 @@
             }
         </div>
         <div class="card-footer">
-            <a class="btn btn-primary" href="@Url.Action("Index", "Home")">На главную</a>
+            <div class="d-flex justify-content-start">
+                <!-- Ссылка на статьи пользователя -->
+                <a class="btn btn-link" href="@Url.Action("Articles", "User", new { id = Model.Id })">Просмотреть статьи</a>
+
+                <!-- Ссылка на редактирование профиля -->
+                <a class="btn btn-link" href="@Url.Action("Edit", "User", new { id = Model.Id })">Редактировать профиль</a>
+
+                <!-- Ссылка на подписки пользователя -->
+                <a class="btn btn-link" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })">Посмотреть подписки</a>
+
+                <!-- Ссылка на подписчиков пользователя -->
+                <a class="btn btn-link" href="@Url.Action("Subscribers", "User", new { id = Model.Id })">Посмотреть подписчиков</a>
+            </div>
         </div>
     </div>
 </div>

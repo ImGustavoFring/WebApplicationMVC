@@ -105,7 +105,7 @@ namespace WebApplicationMVC.Controllers
             return View(article);
         }
 
-        [HttpPost("Edit/{id}")] //проклятый эндпоинт
+        [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(int id, Article article, string[] tagNames)
         {
             if (id != article.Id)
@@ -145,27 +145,58 @@ namespace WebApplicationMVC.Controllers
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-            ViewBag.VisibilityOptions = await _context.Visibilities.Select(v => v.Name).ToListAsync();
-            return View();
+            // Загружаем список всех видимостей для отображения
+            ViewBag.VisibilityOptions = await _context.Visibilities.ToListAsync();
+            return View(new Article());
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(Article article, string[] tagNames)
+        public async Task<IActionResult> Create(string title, string content, int visibilityId, string tagNames)
         {
             if (ModelState.IsValid)
             {
-                article.Userid = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var tags = await GetOrCreateTagsAsync(tagNames);
-                article.Tags = tags;
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Проверка, существует ли выбранная видимость в базе данных
+                var visibility = await _context.Visibilities
+                                               .FirstOrDefaultAsync(v => v.Id == visibilityId);
+
+                if (visibility == null)
+                {
+                    // Если не существует, добавляем ошибку в ModelState
+                    ModelState.AddModelError("Visibilityid", "Выбранная видимость не существует.");
+                    ViewBag.VisibilityOptions = await _context.Visibilities.ToListAsync();
+                    return View();
+                }
+
+                // Разделяем теги и получаем или создаем их
+                var tagArray = tagNames.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                       .Select(t => t.Trim())
+                                       .ToArray();
+
+                var tags = await GetOrCreateTagsAsync(tagArray);
+
+                // Создаем статью
+                var article = new Article
+                {
+                    Title = title,
+                    Content = content,
+                    Visibilityid = visibilityId,
+                    Userid = userId,
+                    Tags = tags
+                };
 
                 _context.Articles.Add(article);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Details), new { id = article.Id });
             }
 
+            // Если модель не прошла проверку, заново передаем видимости
             ViewBag.VisibilityOptions = await _context.Visibilities.ToListAsync();
-            return View(article);
+            return View();
         }
+
 
         private bool UserCanEdit(Article article)
         {
@@ -192,4 +223,3 @@ namespace WebApplicationMVC.Controllers
         }
     }
 }
-
