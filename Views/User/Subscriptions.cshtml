@@ -28,7 +28,7 @@
                                 <td>@subscription.Author.Fullname</td>
                                 <td>@subscription.Createdat.ToString("yyyy-MM-dd")</td>
                                 <td>
-                                    <a href="@Url.Action("Details", "User", new { id = subscription.Author.Id })" class="btn btn-link">Просмотр профиля</a>
+                                    <a href="@Url.Action("Details", "User", new { id = subscription.Author.Id })" class="btn btn-secondary">Просмотр профиля</a>
                                 </td>
                             </tr>
                 }

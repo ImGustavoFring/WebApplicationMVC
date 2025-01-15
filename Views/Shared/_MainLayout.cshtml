@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Computer World</title>
+    <title>@ViewData["Title"] - Computer World</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         header {
             background-color: #2c3e50;
             color: #ffffff;
@@ -14,6 +22,9 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .header-left {
@@ -41,22 +52,92 @@
         }
 
         main {
+            flex: 1;
+            overflow-y: auto;
             background-color: #ffffff;
             color: #34495e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 90vh;
+            padding: 20px;
         }
 
         a {
             color: #ffffff;
             text-decoration: none;
-            margin-left: 20px;
         }
 
             a:hover {
                 color: #bdc3c7;
+                text-decoration: underline;
+            }
+
+        /* Для ссылок внутри карточек статей */
+        .article-card a {
+            color: #007bff; /* Цвет для ссылок на страницы статьи */
+        }
+
+            .article-card a:hover {
+                color: #0056b3; /* Цвет при наведении */
+                text-decoration: underline;
+            }
+
+        /* Для ссылок в header (например, в меню) */
+        .header-left a,
+        .header-right a {
+            color: #ffffff; /* Белые ссылки в шапке */
+        }
+
+            .header-left a:hover,
+            .header-right a:hover {
+                color: #bdc3c7; /* Цвет при наведении для ссылок в шапке */
+            }
+
+        /* Стиль для кнопки "Читать" */
+        .btn-read {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-read:hover {
+                background-color: #5a6268;
+            }
+
+        /* Карточки статей */
+        .article-card {
+            background-color: #ffffff;
+            box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .article-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        .tag-item {
+            background-color: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+            .tag-item:hover {
+                background-color: #5a6268;
             }
 
         .form-container {
@@ -92,6 +173,10 @@
             text-align: center;
             margin-top: 10px;
         }
+
+        .header-right-link {
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
@@ -99,14 +184,12 @@
         <header class="py-3">
             <div class="header-left">
                 <h1><a href="@Url.Action("Index", "Home")">Computer World</a></h1>
-                <!-- Поле поиска -->
                 <input type="text" class="form-control search-input" placeholder="Поиск...">
                 <button class="btn btn-secondary btn-search">Найти</button>
             </div>
             <div class="header-right">
-                <!-- Ссылки -->
-                <a href="@Url.Action("Create", "Article")">Написать статью</a>
-                <a href="@Url.Action("Details", "User")">Профиль</a>
+                <a class="header-right-link" href="@Url.Action("Create", "Article")">Написать статью</a>
+                <a class="header-right-link" href="@Url.Action("Details", "User")">Профиль</a>
             </div>
         </header>
 

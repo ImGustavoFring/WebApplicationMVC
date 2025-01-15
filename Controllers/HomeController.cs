@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplicationMVC.Data;
 using Microsoft.EntityFrameworkCore;
+using WebApplicationMVC.Data;
 using WebApplicationMVC.Models;
 
 namespace WebApplicationMVC.Controllers
@@ -20,18 +20,18 @@ namespace WebApplicationMVC.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
-            // Получаем все теги
-            var tags = await _context.Tags.ToListAsync();
-
-            // Получаем все статьи, отсортированные по дате (по убыванию)
+            // Получаем все статьи с дополнительными данными
             var articles = await _context.Articles
                                          .Include(a => a.Tags)
                                          .Include(a => a.User)
+                                         .Include(a => a.Views)
+                                         .Include(a => a.Ratings)
                                          .OrderByDescending(a => a.Createdat)
                                          .ToListAsync();
 
+            ViewData["Tags"] = await _context.Tags.ToListAsync();
+
             // Передаем данные в представление
-            ViewBag.Tags = tags;
             return View(articles);
         }
 

@@ -55,13 +55,13 @@
                     <h4>Добавить комментарий</h4>
                     <form method="post" asp-action="AddComment" asp-route-id="@Model.Id">
                         <textarea name="commentContent" class="form-control" placeholder="Ваш комментарий" required></textarea>
-                        <button type="submit" class="btn btn-primary mt-3">Отправить</button>
+                        <button type="submit" class="btn btn-secondary mt-3">Отправить</button>
                     </form>
                 }
             </div>
         </div>
         <div class="card-footer">
-            <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-warning">Редактировать</a>
+            <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-secondary">Редактировать</a>
             <a href="@Url.Action("Index", "Article")" class="btn btn-secondary">Назад</a>
         </div>
     </div>

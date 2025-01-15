@@ -28,7 +28,7 @@
                                 <td>@article.Title</td>
                                 <td>@article.Createdat.ToString("yyyy-MM-dd")</td>
                                 <td>
-                                    <a href="@Url.Action("Details", "Article", new { id = article.Id })" class="btn btn-link">Просмотр</a>
+                            <a href="@Url.Action("Details", "Article", new { id = article.Id })" class="btn btn-secondary">Просмотр</a>
                                 </td>
                             </tr>
                 }

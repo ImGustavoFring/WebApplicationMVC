@@ -1,41 +1,78 @@
-﻿@{
+﻿@using WebApplicationMVC.Models
+@{
     Layout = "_MainLayout";
     ViewData["Title"] = "Главная страница";
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4">Последние статьи</h2>
+    <h2 class="mb-4">Теги</h2>
 
-    <!-- Список тегов -->
-    <div class="mb-4">
-        <h4>Теги</h4>
-        <div class="d-flex flex-wrap">
-            @foreach (var tag in ViewBag.Tags as List<WebApplicationMVC.Models.Tag>)
-            {
-                <span class="badge bg-primary me-2 mb-2">@tag.Name</span>
-            }
-        </div>
+    <div class="tag-list">
+        @foreach (var tag in ViewData["Tags"] as List<Tag>)
+        {
+            <div class="tag-item">
+                @tag.Name
+            </div>
+        }
     </div>
 
-    <!-- Список статей (вертикальное отображение) -->
+    <h2 class="mb-4">Статьи</h2>
+
     <div class="list-group">
         @foreach (var article in Model)
         {
-            <div class="list-group-item mb-3">
+            <div class="article-card">
                 <div class="d-flex flex-column">
-                    <!-- Превью изображения статьи -->
-                    @if (!string.IsNullOrEmpty(article.Previewurl))
-                    {
-                        <img src="@article.Previewurl" class="img-fluid mb-3" alt="Preview image">
-                    }
-                    <h5 class="mb-2">@article.Title</h5>
+                    <h4 class="mb-2">@article.Title</h4>
                     <p>
-                        @Html.Raw(article.Content.Length > 100 ? article.Content.Substring(0, 100) + "..." : article.Content)
+                        Автор:
+                        <strong>
+                            @if (article.User != null)
+                            {
+                                <a href="@Url.Action("Details", "User", new { id = article.User.Id })">
+                                    @article.User.Username
+                                </a>
+                            }
+                            else
+                            {
+                                @:Неизвестно
+                            }
+                        </strong>
                     </p>
-                    <a href="@Url.Action("Details", "Article", new { id = article.Id })" class="btn btn-secondary btn-sm">Читать дальше</a>
-                </div>
-                <div class="card-footer text-muted mt-2">
-                    Автор: @article.User.Fullname
+                    <p>Дата публикации: @article.Createdat.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p>Просмотры: @(article.Views != null ? article.Views.Count : 0)</p>
+
+                    <p>
+                        Средняя оценка:
+                        @{
+                            if (article.Ratings != null && article.Ratings.Count > 0)
+                            {
+                                var total = 0;
+                                foreach (var rating in article.Ratings)
+                                {
+                                    total += rating.Value;
+                                }
+                                var average = (double)total / article.Ratings.Count;
+                                @average.ToString("0.0")
+                            }
+                            else
+                            {
+                                @:Нет оценок
+                            }
+                        }
+                    </p>
+
+                    <div>
+                        @if (article.Tags != null && article.Tags.Count > 0)
+                        {
+                            foreach (var tag in article.Tags)
+                            {
+                                <span class="badge bg-secondary me-2">@tag.Name</span>
+                            }
+                        }
+                    </div>
+
+                    <a href="@Url.Action("Details", "Article", new { id = article.Id })" style="color: #fff" class="btn btn-secondary mt-2">Читать</a>
                 </div>
             </div>
         }

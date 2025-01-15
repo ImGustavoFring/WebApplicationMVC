@@ -157,6 +157,7 @@ namespace WebApplicationMVC.Controllers
 
             // Очистка старых тегов и добавление новых
             existingArticle.Tags.Clear();
+
             foreach (var tag in tags)
             {
                 existingArticle.Tags.Add(tag);
@@ -227,6 +228,7 @@ namespace WebApplicationMVC.Controllers
         private async Task<List<Tag>> GetOrCreateTagsAsync(string[] tagNames)
         {
             var tags = new List<Tag>();
+
             foreach (var tagName in tagNames.Distinct())
             {
                 var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);

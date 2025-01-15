@@ -26,16 +26,16 @@
         <div class="card-footer">
             <div class="d-flex justify-content-start">
                 <!-- Ссылка на статьи пользователя -->
-                <a class="btn btn-link" href="@Url.Action("Articles", "User", new { id = Model.Id })">Просмотреть статьи</a>
+                <a class="btn btn-secondary" href="@Url.Action("Articles", "User", new { id = Model.Id })" style="margin-right: 10px;">Просмотреть статьи</a>
 
                 <!-- Ссылка на редактирование профиля -->
-                <a class="btn btn-link" href="@Url.Action("Edit", "User", new { id = Model.Id })">Редактировать профиль</a>
+                <a class="btn btn-secondary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
 
                 <!-- Ссылка на подписки пользователя -->
-                <a class="btn btn-link" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })">Посмотреть подписки</a>
+                <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })" style="margin-right: 10px;" >Посмотреть подписки</a>
 
                 <!-- Ссылка на подписчиков пользователя -->
-                <a class="btn btn-link" href="@Url.Action("Subscribers", "User", new { id = Model.Id })">Посмотреть подписчиков</a>
+                <a class="btn btn-secondary" href="@Url.Action("Subscribers", "User", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписчиков</a>
             </div>
         </div>
     </div>
