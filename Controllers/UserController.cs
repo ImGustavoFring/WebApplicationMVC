@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -31,6 +32,7 @@ public class UserController : Controller
 
         var user = await _context.Users
             .Include(u => u.Role)
+            .Include(u => u.SubscriptionAuthors)
             .FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
@@ -121,7 +123,6 @@ public class UserController : Controller
         return RedirectToAction(nameof(Details), new { id = existingUser.Id });
     }
 
-
     [HttpGet("Articles/{id?}")]
     public async Task<IActionResult> Articles(int? id)
     {
@@ -182,5 +183,92 @@ public class UserController : Controller
             .ToListAsync();
 
         return View(subscribers);
+    }
+
+    [HttpPost("Delete/{id?}")]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        // Если id не указан или совпадает с текущим пользователем
+        if (!id.HasValue || id == currentUserId)
+        {
+            id = currentUserId;
+        }
+
+        // Если пользователь пытается удалить не себя и не является администратором
+        if (id != currentUserId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        // Если удаляется текущий пользователь, разлогиниваем его
+        if (id == currentUserId)
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Register", "Auth");
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    // Подписка на пользователя
+    [HttpPost("Subscribe/{id}")]
+    public async Task<IActionResult> Subscribe(int id)
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        if (currentUserId == id)
+        {
+            return BadRequest("Нельзя подписаться на себя.");
+        }
+
+        var existingSubscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(s => s.Subscriberid == currentUserId && s.Authorid == id);
+
+        if (existingSubscription != null)
+        {
+            return BadRequest("Вы уже подписаны на этого пользователя.");
+        }
+
+        var subscription = new Subscription
+        {
+            Subscriberid = currentUserId,
+            Authorid = id
+        };
+
+        _context.Subscriptions.Add(subscription);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Articles), new { id });
+    }
+
+    // Отписка от пользователя
+    [HttpPost("Unsubscribe/{id}")]
+    public async Task<IActionResult> Unsubscribe(int id)
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        var subscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(s => s.Subscriberid == currentUserId && s.Authorid == id);
+
+        if (subscription == null)
+        {
+            return BadRequest("Вы не подписаны на этого пользователя.");
+        }
+
+        _context.Subscriptions.Remove(subscription);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Articles), new { id });
     }
 }

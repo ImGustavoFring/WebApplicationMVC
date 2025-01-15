@@ -1,4 +1,5 @@
-﻿@model WebApplicationMVC.Models.User
+﻿@using System.Security.Claims
+@model WebApplicationMVC.Models.User
 
 @{
     Layout = "_MainLayout";
@@ -25,17 +26,55 @@
         </div>
         <div class="card-footer">
             <div class="d-flex justify-content-start">
-                <!-- Ссылка на статьи пользователя -->
                 <a class="btn btn-secondary" href="@Url.Action("Articles", "User", new { id = Model.Id })" style="margin-right: 10px;">Просмотреть статьи</a>
-
-                <!-- Ссылка на редактирование профиля -->
                 <a class="btn btn-secondary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
-
-                <!-- Ссылка на подписки пользователя -->
-                <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })" style="margin-right: 10px;" >Посмотреть подписки</a>
-
-                <!-- Ссылка на подписчиков пользователя -->
+                <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписки</a>
                 <a class="btn btn-secondary" href="@Url.Action("Subscribers", "User", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписчиков</a>
+
+                @if (Model.Id != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                {
+                    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                    var isSubscribed = Model.SubscriptionAuthors.Any(s => s.Subscriberid == currentUserId);
+
+                    if (!isSubscribed)
+                    {
+                        <form method="post" action="@Url.Action("Subscribe", "User", new { id = Model.Id })">
+                            <button type="submit" class="btn btn-primary" style="margin-right: 10px;">Подписаться</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" action="@Url.Action("Unsubscribe", "User", new { id = Model.Id })">
+                            <button type="submit" class="btn btn-danger" style="margin-right: 10px;">Отписаться</button>
+                        </form>
+                    }
+                }
+
+                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || User.IsInRole("Admin"))
+                {
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить аккаунт</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить ваш аккаунт? Это действие невозможно отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="post" action="@Url.Action("Delete", "User", new { id = Model.Id })">
+                    <button type="submit" class="btn btn-danger" >Удалить аккаунт</button>
+                </form>
             </div>
         </div>
     </div>
