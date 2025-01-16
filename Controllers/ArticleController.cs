@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApplicationMVC.Data;
-using WebApplicationMVC.Models;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using WebApplicationMVC.Data;
+using WebApplicationMVC.Models;
 
 namespace WebApplicationMVC.Controllers
 {
@@ -19,155 +19,6 @@ namespace WebApplicationMVC.Controllers
         {
             _context = context;
         }
-
-        [HttpGet("Details/{id}")]
-        public async Task<IActionResult> Details(int id)
-        {
-            var article = await _context.Articles
-                .Include(a => a.User)
-                .Include(a => a.Comments)
-                .Include(a => a.Tags)
-                .Include(a => a.Views)
-                .Include(a => a.Visibility)
-                .Include(a => a.Ratings)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (article == null)
-            {
-                return NotFound();
-            }
-
-            article.Comments = article.Comments ?? new List<Comment>();
-            article.Tags = article.Tags ?? new List<Tag>();
-            article.Ratings = article.Ratings ?? new List<Rating>();
-            article.Views = article.Views ?? new List<View>();
-
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var existingView = article.Views.FirstOrDefault(v => v.Userid == userId);
-
-            if (existingView == null)
-            {
-                article.Views.Add(new View { Articleid = article.Id, Userid = userId });
-                await _context.SaveChangesAsync();
-            }
-
-            return View(article);
-        }
-
-        [HttpPost("Details/{id}")]
-        public async Task<IActionResult> AddComment(int id, string commentContent)
-        {
-            var article = await _context.Articles
-                .Include(a => a.Comments)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (article == null)
-            {
-                return NotFound();
-            }
-
-            var comment = new Comment
-            {
-                Articleid = article.Id,
-                Userid = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)),
-                Content = commentContent,
-                Createdat = DateTime.Now
-            };
-
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Details), new { id = article.Id });
-        }
-
-        [HttpGet("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var article = await _context.Articles
-                .Include(a => a.Tags)
-                .Include(a => a.Visibility)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (article == null)
-            {
-                return NotFound();
-            }
-
-            if (!UserCanEdit(article))
-            {
-                return Forbid();
-            }
-
-            var visibilities = await _context.Visibilities.ToListAsync();
-
-            // Преобразование в List<string> с ненулевыми значениями
-            var visibilityNames = visibilities
-                .Where(v => v.Name != null)  // исключаем null значения
-                .Select(v => v.Name)
-                .ToList();
-
-            ViewBag.VisibilityOptions = visibilityNames;
-
-            return View(article);
-        }
-
-        [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id, string title, string content, string visibilityName, string[] tagNames)
-        {
-            var existingArticle = await _context.Articles
-                .Include(a => a.Tags)
-                .Include(a => a.Visibility)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (existingArticle == null)
-            {
-                return NotFound();
-            }
-
-            if (!UserCanEdit(existingArticle))
-            {
-                return Forbid();
-            }
-
-            // Проверка на null для Visibility
-            if (string.IsNullOrEmpty(visibilityName))
-            {
-                ModelState.AddModelError("Visibility", "Видимость не может быть пустой.");
-                ViewBag.VisibilityOptions = await _context.Visibilities.Select(v => v.Name).ToListAsync();
-                return View(existingArticle);
-            }
-
-            var visibility = await _context.Visibilities
-                                           .FirstOrDefaultAsync(v => v.Name == visibilityName);
-
-            if (visibility == null)
-            {
-                ModelState.AddModelError("Visibilityid", "Выбранная видимость не существует.");
-                ViewBag.VisibilityOptions = await _context.Visibilities.Select(v => v.Name).ToListAsync();
-                return View(existingArticle);
-            }
-
-            // Обновление данных статьи
-            existingArticle.Title = title;
-            existingArticle.Content = content;
-            existingArticle.Visibilityid = visibility.Id;
-
-            // Обработка тегов
-            var tags = await GetOrCreateTagsAsync(tagNames);
-
-            // Очистка старых тегов и добавление новых
-            existingArticle.Tags.Clear();
-
-            foreach (var tag in tags)
-            {
-                existingArticle.Tags.Add(tag);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Details), new { id = existingArticle.Id });
-        }
-
 
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
@@ -218,6 +69,136 @@ namespace WebApplicationMVC.Controllers
             return View();
         }
 
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var article = await _context.Articles
+                .Include(a => a.User)
+                .Include(a => a.Comments)
+                .Include(a => a.Tags)
+                .Include(a => a.Views)
+                .Include(a => a.Visibility)
+                .Include(a => a.Ratings)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var existingView = article.Views.FirstOrDefault(v => v.Userid == userId);
+
+            if (existingView == null)
+            {
+                article.Views.Add(new View { Articleid = article.Id, Userid = userId });
+                await _context.SaveChangesAsync();
+            }
+
+            return View(article);
+        }
+
+        [HttpGet("Articles/{id?}")]
+        public async Task<IActionResult> Articles(int? id)
+        {
+            if (!id.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null || !int.TryParse(userId, out int parsedId))
+                {
+                    return Unauthorized();
+                }
+                id = parsedId;
+            }
+
+            var articles = await _context.Articles
+                .Where(a => a.Userid == id)
+                .ToListAsync();
+
+            return View(articles);
+        }
+
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var article = await _context.Articles
+                .Include(a => a.Tags)
+                .Include(a => a.Visibility)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            if (!UserCanEdit(article))
+            {
+                return Forbid();
+            }
+
+            ViewBag.VisibilityOptions = await _context.Visibilities
+                .Select(v => v.Name)
+                .ToListAsync();
+
+            return View(article);
+        }
+
+        [HttpPost("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id, string title, string content, string visibilityName, string[] tagNames)
+        {
+            var existingArticle = await _context.Articles
+                .Include(a => a.Tags)
+                .Include(a => a.Visibility)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (existingArticle == null)
+            {
+                return NotFound();
+            }
+
+            if (!UserCanEdit(existingArticle))
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrEmpty(visibilityName))
+            {
+                ModelState.AddModelError("Visibility", "Видимость не может быть пустой.");
+                ViewBag.VisibilityOptions = await _context.Visibilities
+                    .Select(v => v.Name)
+                    .ToListAsync();
+                return View(existingArticle);
+            }
+
+            var visibility = await _context.Visibilities
+                .FirstOrDefaultAsync(v => v.Name == visibilityName);
+
+            if (visibility == null)
+            {
+                ModelState.AddModelError("Visibility", "Выбранная видимость не существует.");
+                ViewBag.VisibilityOptions = await _context.Visibilities
+                    .Select(v => v.Name)
+                    .ToListAsync();
+                return View(existingArticle);
+            }
+
+            existingArticle.Title = title;
+            existingArticle.Content = content;
+            existingArticle.Visibilityid = visibility.Id;
+
+            var tags = await GetOrCreateTagsAsync(tagNames);
+
+            existingArticle.Tags.Clear();
+            foreach (var tag in tags)
+            {
+                existingArticle.Tags.Add(tag);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = existingArticle.Id });
+        }
+
         private bool UserCanEdit(Article article)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -239,6 +220,7 @@ namespace WebApplicationMVC.Controllers
                 }
                 tags.Add(tag);
             }
+
             await _context.SaveChangesAsync();
             return tags;
         }
