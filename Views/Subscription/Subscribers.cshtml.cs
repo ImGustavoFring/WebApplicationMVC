@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WebApplicationMVC.Views.User
+namespace WebApplicationMVC.Views.Subscription
 {
     public class SubscribersModel : PageModel
     {

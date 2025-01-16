@@ -26,10 +26,14 @@
         </div>
         <div class="card-footer">
             <div class="d-flex justify-content-start">
-                <a class="btn btn-secondary" href="@Url.Action("Articles", "User", new { id = Model.Id })" style="margin-right: 10px;">Просмотреть статьи</a>
-                <a class="btn btn-secondary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
-                <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "User", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписки</a>
-                <a class="btn btn-secondary" href="@Url.Action("Subscribers", "User", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписчиков</a>
+                <a class="btn btn-secondary" href="@Url.Action("Articles", "Article", new { id = Model.Id })" style="margin-right: 10px;">Просмотреть статьи</a>
+                <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "Subscription", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписки</a>
+                <a class="btn btn-secondary" href="@Url.Action("Subscribers", "Subscription", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписчиков</a>
+
+                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                {
+                    <a class="btn btn-primary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
+                }
 
                 @if (Model.Id != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 {
@@ -39,19 +43,21 @@
 
                     if (!isSubscribed)
                     {
-                        <form method="post" action="@Url.Action("Subscribe", "User", new { id = Model.Id })">
+                        <form method="post" action="@Url.Action("Subscribe", "Subscription", new { id = Model.Id })">
                             <button type="submit" class="btn btn-primary" style="margin-right: 10px;">Подписаться</button>
                         </form>
+
                     }
                     else
                     {
-                        <form method="post" action="@Url.Action("Unsubscribe", "User", new { id = Model.Id })">
+                        <form method="post" action="@Url.Action("Unsubscribe", "Subscription", new { id = Model.Id })">
                             <button type="submit" class="btn btn-danger" style="margin-right: 10px;">Отписаться</button>
                         </form>
+
                     }
                 }
 
-                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || User.IsInRole("Admin"))
+                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 {
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить аккаунт</button>
                 }
@@ -68,7 +74,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Вы уверены, что хотите удалить ваш аккаунт? Это действие невозможно отменить.
+                Вы уверены, что хотите удалить свой аккаунт? Это действие невозможно отменить.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>

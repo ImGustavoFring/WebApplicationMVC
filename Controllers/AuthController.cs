@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplicationMVC.Controllers
 {
@@ -96,6 +97,7 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Login");
         }
 
+        [Authorize(Policy = "UserPolicy")]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {

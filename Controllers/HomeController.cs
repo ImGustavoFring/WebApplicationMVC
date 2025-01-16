@@ -20,7 +20,6 @@ namespace WebApplicationMVC.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
-            // Получаем все статьи с дополнительными данными
             var articles = await _context.Articles
                                          .Include(a => a.Tags)
                                          .Include(a => a.User)
@@ -31,7 +30,6 @@ namespace WebApplicationMVC.Controllers
 
             ViewData["Tags"] = await _context.Tags.ToListAsync();
 
-            // Передаем данные в представление
             return View(articles);
         }
 
