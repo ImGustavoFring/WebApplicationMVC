@@ -1,4 +1,5 @@
-﻿@model WebApplicationMVC.Models.User
+﻿@using WebApplicationMVC.Models
+@model WebApplicationMVC.Models.User
 
 @{
     Layout = "_MainLayout";
@@ -46,14 +47,15 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Роль:</strong></label>
-                    <select name="RoleName" class="form-select" required>
-                        @foreach (var role in ViewBag.Roles as List<string>)
+                    <select name="roleId" class="form-select" required>
+                        @foreach (var role in ViewBag.Roles as List<Role>)
                         {
-                            <option value="@role" @(role == Model.Role?.Name ? "selected" : "")>@role</option>
+                            <option value="@role.Id">@role.Name</option>
                         }
                     </select>
                     <span class="text-danger"></span>
                 </div>
+
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-secondary">Сохранить изменения</button>

@@ -36,8 +36,7 @@ namespace WebApplicationMVC.Controllers
             {
                 Articleid = articleId,
                 Userid = userId,
-                Content = content,
-                Createdat = DateTime.Now
+                Content = content
             };
 
             _context.Comments.Add(comment);
