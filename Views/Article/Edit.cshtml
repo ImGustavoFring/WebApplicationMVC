@@ -1,4 +1,5 @@
 ﻿@model WebApplicationMVC.Models.Article
+@using WebApplicationMVC.Models;
 
 @{
     ViewData["Title"] = "Редактирование статьи";
@@ -28,20 +29,18 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Видимость:</strong></label>
-                    <select name="visibilityName" class="form-select" required>
-                        @foreach (var visibilityName in ViewBag.VisibilityOptions as List<string>)
+                    <select name="visibilityId" class="form-select" required>
+                        @foreach (var visibility in ViewBag.VisibilityOptions as List<Visibility>)
                         {
-                            <option value="@visibilityName" @(visibilityName == Model.Visibility.Name ? "selected" : "")>@visibilityName</option>
+                            <option value="@visibility.Id">@visibility.Name</option>
                         }
                     </select>
                     <span class="text-danger"></span>
                 </div>
 
-
-
                 <div class="mb-3">
                     <label class="form-label"><strong>Теги:</strong></label>
-                    <input name="tagNames" class="form-control" placeholder="Введите теги через запятую" value="@string.Join(", ", Model.Tags.Select(t => t.Name))" />
+                    <input name="tagNames" class="form-control" placeholder="Введите теги, разделяя их запятыми" value="@string.Join(", ", Model.Tags.Select(t => t.Name))" />
                     <span class="text-danger"></span>
                 </div>
 

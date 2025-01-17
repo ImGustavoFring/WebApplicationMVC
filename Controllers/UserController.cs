@@ -61,7 +61,7 @@ namespace WebApplicationMVC.Controllers
                 return NotFound();
             }
 
-            var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
+            var roles = await _context.Roles.ToListAsync();
 
             ViewBag.Roles = roles;
 
@@ -69,7 +69,7 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Edit")]
-        public async Task<IActionResult> Edit(string RoleName,
+        public async Task<IActionResult> Edit(int RoleId,
             string Username, string Email,
             string Fullname, string Bio,
             string Contactinfo, string Avatarurl)
@@ -95,11 +95,11 @@ namespace WebApplicationMVC.Controllers
             existingUser.Contactinfo = Contactinfo;
             existingUser.Avatarurl = Avatarurl;
 
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleName);
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == RoleId);
             if (role == null)
             {
-                ModelState.AddModelError("RoleName", "Invalid role.");
-                var roles = await _context.Roles.Select(r => r.Name).ToListAsync();
+                ModelState.AddModelError("RoleId", "Invalid role.");
+                var roles = await _context.Roles.ToListAsync();
                 ViewBag.Roles = roles;
                 return View(existingUser);
             }

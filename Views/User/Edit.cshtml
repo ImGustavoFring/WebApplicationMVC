@@ -1,4 +1,5 @@
-﻿@model WebApplicationMVC.Models.User
+﻿@using WebApplicationMVC.Models
+@model WebApplicationMVC.Models.User
 
 @{
     Layout = "_MainLayout";
@@ -13,6 +14,18 @@
         <div class="card-body">
             <form method="post" asp-action="Edit" asp-controller="User">
                 <input type="hidden" asp-for="Id" />
+
+                <div class="d-flex justify-content-start mb-4">
+                    <div class="user-avatar-wrapper" style="width: 120px; height: 160px; background-color: #bdc3c7; border-radius: 5px; overflow: hidden;">
+                        <img id="userAvatar" src="@Model.Avatarurl" alt="Аватар пользователя не загружен." class="user-avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Ссылка на аватар:</strong></label>
+                    <input name="Avatarurl" id="Avatarurl" class="form-control" placeholder="Введите ссылку на аватар" value="@Model.Avatarurl" />
+                    <span class="text-danger"></span>
+                </div>
 
                 <div class="mb-3">
                     <label asp-for="Username" class="form-label"><strong>Логин:</strong></label>
@@ -46,20 +59,31 @@
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Роль:</strong></label>
-                    <select name="RoleName" class="form-select" required>
-                        @foreach (var role in ViewBag.Roles as List<string>)
+                    <select name="roleId" class="form-select" required>
+                        @foreach (var role in ViewBag.Roles as List<Role>)
                         {
-                            <option value="@role" @(role == Model.Role?.Name ? "selected" : "")>@role</option>
+                            <option value="@role.Id">@role.Name</option>
                         }
                     </select>
                     <span class="text-danger"></span>
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-secondary">Сохранить изменения</button>
-                    <a href="@Url.Action("Details", "User", new { id = Model.Id })" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-secondary">Сохранить</button>
+                    <a href="@Url.Action("Details", "User", new { id = Model.Id })" class="btn btn-secondary">Назад</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("Avatarurl").addEventListener("input", function() {
+        var avatarUrl = this.value;
+        var avatarImage = document.getElementById("userAvatar");
+
+        if (avatarUrl) {
+            avatarImage.src = avatarUrl;
+        }
+    });
+</script>

@@ -36,10 +36,29 @@
                 margin-right: 20px;
             }
 
+                .header-left h1 a {
+                    color: #ffffff;
+                    text-decoration: none;
+                }
+
+                    .header-left h1 a:hover {
+                        color: #bdc3c7;
+                    }
+
         .header-right {
             display: flex;
             align-items: center;
         }
+
+        .header-right-link {
+            color: #ffffff;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+            .header-right-link:hover {
+                color: #bdc3c7;
+            }
 
         .search-input {
             height: 35px;
@@ -59,123 +78,12 @@
             padding: 20px;
         }
 
-        a {
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-            a:hover {
-                color: #bdc3c7;
-                text-decoration: underline;
-            }
-
-        /* Для ссылок внутри карточек статей */
-        .article-card a {
-            color: #007bff; /* Цвет для ссылок на страницы статьи */
-        }
-
-            .article-card a:hover {
-                color: #0056b3; /* Цвет при наведении */
-                text-decoration: underline;
-            }
-
-        /* Для ссылок в header (например, в меню) */
-        .header-left a,
-        .header-right a {
-            color: #ffffff; /* Белые ссылки в шапке */
-        }
-
-            .header-left a:hover,
-            .header-right a:hover {
-                color: #bdc3c7; /* Цвет при наведении для ссылок в шапке */
-            }
-
-        /* Стиль для кнопки "Читать" */
-        .btn-read {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-            .btn-read:hover {
-                background-color: #5a6268;
-            }
-
-        /* Карточки статей */
-        .article-card {
-            background-color: #ffffff;
-            box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-            .article-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-            }
-
-        .tag-list {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            margin-bottom: 15px;
-        }
-
-        .tag-item {
-            background-color: #6c757d;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-            .tag-item:hover {
-                background-color: #5a6268;
-            }
-
-        .form-container {
-            background-color: #f8f9fa;
-            box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 6px;
-            padding: 15px;
-            width: 100%;
-            max-width: 600px; /* Фиксированная максимальная ширина */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto; /* Центрирование по горизонтали */
-        }
-
-        .form-control {
-            height: 45px;
-            min-width: 300px;
-        }
-
-        .form-label {
-            font-size: 0.9rem;
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .header-right-link {
-            margin-right: 15px;
+        .user-avatar {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            background-color: #bdc3c7;
+            border-radius: 5px;
         }
     </style>
 </head>
