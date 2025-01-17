@@ -44,22 +44,6 @@ namespace WebApplicationMVC.Controllers
             return View(user);
         }
 
-        [HttpGet("Search")]
-        public async Task<IActionResult> Search(string searchString)
-        {
-            if (string.IsNullOrEmpty(searchString))
-            {
-                return View(new List<User>());
-            }
-
-            var users = await _context.Users
-                .Where(u => u.Fullname.Contains(searchString))
-                .ToListAsync();
-
-            return View(users);
-        }
-
-
         [HttpGet("Edit")]
         public async Task<IActionResult> Edit()
         {

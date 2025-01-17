@@ -3,7 +3,7 @@
 
 @{
     Layout = "_MainLayout";
-    ViewData["Title"] = "Детали пользователя";
+    ViewData["Title"] = "Информация о пользователе";
 }
 
 <div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
@@ -12,6 +12,11 @@
             <h2>Информация о пользователе</h2>
         </div>
         <div class="card-body">
+            <div class="d-flex justify-content-start mb-4">
+                <div class="user-avatar-wrapper" style="width: 120px; height: 160px; background-color: #bdc3c7; border-radius: 5px; overflow: hidden;">
+                    <img src="@Model.Avatarurl" alt="Аватар пользователя не загружен." class="user-avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+            </div>
             <p><strong>Логин:</strong> @Model.Username</p>
             <p><strong>Электронная почта:</strong> @Model.Email</p>
             <p><strong>Полное имя:</strong> @Model.Fullname</p>
@@ -46,14 +51,12 @@
                         <form method="post" action="@Url.Action("Subscribe", "Subscription", new { id = Model.Id })">
                             <button type="submit" class="btn btn-primary" style="margin-right: 10px;">Подписаться</button>
                         </form>
-
                     }
                     else
                     {
                         <form method="post" action="@Url.Action("Unsubscribe", "Subscription", new { id = Model.Id })">
                             <button type="submit" class="btn btn-danger" style="margin-right: 10px;">Отписаться</button>
                         </form>
-
                     }
                 }
 
@@ -79,7 +82,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 <form method="post" action="@Url.Action("Delete", "User", new { id = Model.Id })">
-                    <button type="submit" class="btn btn-danger" >Удалить аккаунт</button>
+                    <button type="submit" class="btn btn-danger">Удалить аккаунт</button>
                 </form>
             </div>
         </div>

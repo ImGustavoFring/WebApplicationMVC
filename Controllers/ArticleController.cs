@@ -69,7 +69,7 @@ namespace WebApplicationMVC.Controllers
             return View();
         }
 
-        [HttpGet("Details")]
+        [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(int? id)
         {
             var article = await _context.Articles
@@ -119,7 +119,7 @@ namespace WebApplicationMVC.Controllers
             return View(articles);
         }
 
-        [HttpGet("Edit")]
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             var article = await _context.Articles
@@ -137,7 +137,7 @@ namespace WebApplicationMVC.Controllers
             return View(article);
         }
 
-        [HttpPost("Edit")]
+        [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(int id, string title, string content, int visibilityId, string tagNames)
         {
             var existingArticle = await _context.Articles
@@ -182,7 +182,7 @@ namespace WebApplicationMVC.Controllers
         }
 
 
-        [HttpPost("Delete")]
+        [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id);

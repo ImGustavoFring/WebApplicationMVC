@@ -19,7 +19,7 @@ namespace WebApplicationMVC.Controllers
             _context = context;
         }
 
-        [HttpPost("Add")]
+        [HttpPost("Add/{articleId}")]
         public async Task<IActionResult> Add(int articleId, string content)
         {
             var article = await _context.Articles
@@ -45,20 +45,17 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
-        [HttpPost("Edit")]
-        public async Task<IActionResult> Edit(int articleId, int userId, string newContent)
+        [HttpPost("Edit/{id}")]
+        public async Task<IActionResult> Edit(int articleId, string newContent)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var comment = await _context.Comments
                 .FirstOrDefaultAsync(c => c.Articleid == articleId && c.Userid == userId);
 
             if (comment == null)
             {
                 return NotFound();
-            }
-
-            if (comment.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-            {
-                return Forbid();
             }
 
             comment.Content = newContent;
@@ -69,20 +66,17 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
-        [HttpPost("Delete")]
-        public async Task<IActionResult> Delete(int articleId, int userId)
+        [HttpPost("Delete/{id}")]
+        public async Task<IActionResult> Delete(int articleId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var comment = await _context.Comments
                 .FirstOrDefaultAsync(c => c.Articleid == articleId && c.Userid == userId);
 
             if (comment == null)
             {
                 return NotFound();
-            }
-
-            if (comment.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-            {
-                return Forbid();
             }
 
             _context.Comments.Remove(comment);
