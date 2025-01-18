@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Детали статьи";
     Layout = "_MainLayout";
+
+    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    var isOwner = Model.Userid == currentUserId;
 }
 
 <div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
@@ -43,7 +46,7 @@
 
             @if (User.Identity.IsAuthenticated)
             {
-                var userRating = Model.Ratings.FirstOrDefault(r => r.Userid == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+                var userRating = Model.Ratings.FirstOrDefault(r => r.Userid == currentUserId);
 
                 if (userRating == null)
                 {
@@ -73,7 +76,7 @@
                     <div class="border p-3 mb-3">
                         <p><strong>@comment.User?.Username</strong> (Дата: @comment.Createdat.ToString("yyyy-MM-dd HH:mm"))</p>
                         <p>@comment.Content</p>
-                        @if (comment.Userid == int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)))
+                        @if (comment.Userid == currentUserId)
                         {
                             <form method="post" action="@Url.Action("Edit", "Comment", new { articleId = Model.Id })">
                                 <textarea name="newContent" class="form-control" required>@comment.Content</textarea>
@@ -88,7 +91,7 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                    var userComment = Model.Comments.FirstOrDefault(c => c.Userid == int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)));
+                    var userComment = Model.Comments.FirstOrDefault(c => c.Userid == currentUserId);
 
                     if (userComment == null)
                     {
@@ -106,7 +109,13 @@
             </div>
         </div>
         <div class="card-footer">
-            <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-primary">Редактировать</a>
+            @if (isOwner)
+            {
+                <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-primary">Редактировать</a>
+                <form method="post" action="@Url.Action("Delete", "Article", new { id = Model.Id })" class="d-inline-block">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            }
             <a href="@Url.Action("Articles", "Article")" class="btn btn-secondary">Назад</a>
         </div>
     </div>

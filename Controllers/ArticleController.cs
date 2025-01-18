@@ -128,9 +128,9 @@ namespace WebApplicationMVC.Controllers
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (article == null)
+            if (article == null || article.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
-                return NotFound();
+                return Forbid();
             }
 
             ViewBag.VisibilityOptions = await _context.Visibilities.ToListAsync();
@@ -146,9 +146,9 @@ namespace WebApplicationMVC.Controllers
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (existingArticle == null)
+            if (existingArticle == null || existingArticle.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
-                return NotFound();
+                return Forbid();
             }
 
             var visibility = await _context.Visibilities.FirstOrDefaultAsync(v => v.Id == visibilityId);
