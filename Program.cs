@@ -1,4 +1,6 @@
 using WebApplicationMVC.Data;
+using WebApplicationMVC.Middlewares;
+using WebApplicationMVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,6 @@ builder.Services.AddAuthentication("CookieAuth")
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
         options.Cookie.IsEssential = true;
-        options.Cookie.Expiration = null;
         options.SlidingExpiration = true;
     });
 
@@ -30,6 +31,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<VisitTrackerService>();
 
 var app = builder.Build();
 
@@ -42,10 +44,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseStaticFiles();
-
-app.MapControllers();
-
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<VisitTrackerMiddleware>();
+
+app.MapControllers();
 
 app.Run();

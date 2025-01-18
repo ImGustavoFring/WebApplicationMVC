@@ -139,7 +139,7 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id, string title, string content, int visibilityId, string tagNames)
+        public async Task<IActionResult> Edit(int id, string title, string content, int visibilityId, string tagNames, string? previewUrl)
         {
             var existingArticle = await _context.Articles
                 .Include(a => a.Tags)
@@ -163,6 +163,7 @@ namespace WebApplicationMVC.Controllers
             existingArticle.Title = title;
             existingArticle.Content = content;
             existingArticle.Visibilityid = visibility.Id;
+            existingArticle.Previewurl = previewUrl;
 
             var tagArray = tagNames.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                        .Select(t => t.Trim())
