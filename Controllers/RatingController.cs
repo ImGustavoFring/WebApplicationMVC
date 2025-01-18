@@ -25,7 +25,7 @@ namespace WebApplicationMVC.Controllers
         {
             if (value < 1 || value > 10)
             {
-                return BadRequest("Оценка должна быть в диапазоне от 1 до 10.");
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -35,7 +35,7 @@ namespace WebApplicationMVC.Controllers
 
             if (existingRating != null)
             {
-                return BadRequest("Вы уже поставили оценку этой статье.");
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             var rating = new Rating
@@ -48,7 +48,7 @@ namespace WebApplicationMVC.Controllers
             _context.Ratings.Add(rating);
             await _context.SaveChangesAsync();
 
-            return Ok("Оценка успешно добавлена.");
+            return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
         [HttpPost("Update")]
@@ -56,7 +56,7 @@ namespace WebApplicationMVC.Controllers
         {
             if (value < 1 || value > 10)
             {
-                return BadRequest("Оценка должна быть в диапазоне от 1 до 10.");
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -66,13 +66,13 @@ namespace WebApplicationMVC.Controllers
 
             if (existingRating == null)
             {
-                return NotFound("Оценка не найдена.");
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             existingRating.Value = value;
             await _context.SaveChangesAsync();
 
-            return Ok("Оценка успешно обновлена.");
+            return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
         [HttpPost("Delete")]
@@ -85,13 +85,13 @@ namespace WebApplicationMVC.Controllers
 
             if (existingRating == null)
             {
-                return NotFound("Оценка не найдена.");
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             _context.Ratings.Remove(existingRating);
             await _context.SaveChangesAsync();
 
-            return Ok("Оценка успешно удалена.");
+            return RedirectToAction("Details", "Article", new { id = articleId });
         }
     }
 }

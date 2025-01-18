@@ -28,7 +28,7 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(string title, string content, int visibilityId, string tagNames)
+        public async Task<IActionResult> Create(string title, string content, int visibilityId, string tagNames, string? previewUrl)
         {
             if (ModelState.IsValid)
             {
@@ -56,7 +56,8 @@ namespace WebApplicationMVC.Controllers
                     Content = content,
                     Visibilityid = visibilityId,
                     Userid = userId,
-                    Tags = tags
+                    Tags = tags,
+                    Previewurl = previewUrl
                 };
 
                 _context.Articles.Add(article);

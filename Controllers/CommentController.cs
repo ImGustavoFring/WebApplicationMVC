@@ -45,7 +45,7 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
-        [HttpPost("Edit/{id}")]
+        [HttpPost("Edit/{articleId}")]
         public async Task<IActionResult> Edit(int articleId, string newContent)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -55,7 +55,7 @@ namespace WebApplicationMVC.Controllers
 
             if (comment == null)
             {
-                return NotFound();
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             comment.Content = newContent;
@@ -66,7 +66,7 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
-        [HttpPost("Delete/{id}")]
+        [HttpPost("Delete/{articleId}")]
         public async Task<IActionResult> Delete(int articleId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -76,7 +76,7 @@ namespace WebApplicationMVC.Controllers
 
             if (comment == null)
             {
-                return NotFound();
+                return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
             _context.Comments.Remove(comment);
