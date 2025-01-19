@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Детали статьи";
     Layout = "_MainLayout";
+
+    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    var isOwner = Model.Userid == currentUserId;
 }
 
 <div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
@@ -10,16 +13,6 @@
         <div class="card-header">
             <h2>@Model.Title</h2>
             <p><strong>Автор:</strong> @Model.User?.Username</p>
-            <p><strong>Дата создания:</strong> @Model.Createdat.ToString("yyyy-MM-dd HH:mm")</p>
-            @if (Model.Updatedat.HasValue)
-            {
-                <p><strong>Последнее обновление:</strong> @Model.Updatedat.Value.ToString("yyyy-MM-dd HH:mm")</p>
-            }
-        </div>
-        <div class="card-body">
-            <p><strong>Содержание:</strong> @Model.Content</p>
-
-            <p><strong>Видимость:</strong> @Model.Visibility?.Name</p>
 
             <p><strong>Теги:</strong></p>
             <ul>
@@ -29,61 +22,100 @@
                 }
             </ul>
 
+            <p><strong>Дата создания:</strong> @Model.Createdat.ToString("yyyy-MM-dd HH:mm")</p>
+            @if (Model.Updatedat.HasValue)
+            {
+                <p><strong>Последнее обновление:</strong> @Model.Updatedat.Value.ToString("yyyy-MM-dd HH:mm")</p>
+            }
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-start mb-4">
+                <div class="user-avatar-wrapper" style="width: 500px; height: 500px; background-color: #bdc3c7; border-radius: 5px; overflow: hidden;">
+                    <img id="previewUrl" src="@Model.Previewurl" alt="Превью статьи не загружено." class="preview-img" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+            </div>
+            <p><strong>Содержание:</strong> @Model.Content</p>
+
             <p><strong>Количество просмотров:</strong> @(Model.Views?.Count ?? 0)</p>
 
-            @if (Model.Ratings?.Any() == true)
+            <p>
+                <strong>Средняя оценка:</strong> @(Model.Ratings?.Any() == true
+                ? Model.Ratings.Average(r => r.Value).ToString("F1")
+                : "Нет оценок") из 10.
+            </p>
+
+            @if (User.Identity.IsAuthenticated)
             {
-                <p><strong>Средняя оценка:</strong> @(Model.Ratings.Average(r => r.Value).ToString("F1"))</p>
-            }
-            else
-            {
-                <p><strong>Средняя оценка:</strong> Нет оценок</p>
+                var userRating = Model.Ratings.FirstOrDefault(r => r.Userid == currentUserId);
+
+                if (userRating == null)
+                {
+                    <h4>Оценить статью</h4>
+                    <form method="post" action="@Url.Action("Create", "Rating", new { articleId = Model.Id })">
+                        <input type="number" name="value" min="1" max="10" class="form-control" required />
+                        <button type="submit" class="btn btn-secondary mt-3">Оценить</button>
+                    </form>
+                }
+                else
+                {
+                    <h4>Ваша оценка: @userRating.Value</h4>
+                    <form method="post" action="@Url.Action("Update", "Rating", new { articleId = Model.Id })">
+                        <input type="number" name="value" min="1" max="10" class="form-control" value="@userRating.Value" required />
+                        <button type="submit" class="btn btn-secondary mt-3">Обновить оценку</button>
+                    </form>
+                    <form method="post" action="@Url.Action("Delete", "Rating", new { articleId = Model.Id })" class="mt-3">
+                        <button type="submit" class="btn btn-danger">Удалить оценку</button>
+                    </form>
+                }
             }
 
-            <h3>Комментарии</h3>
+            <h3>Рецензии: @(Model.Comments?.Count ?? 0)</h3>
             <div>
                 @foreach (var comment in Model.Comments.OrderBy(c => c.Createdat))
                 {
                     <div class="border p-3 mb-3">
                         <p><strong>@comment.User?.Username</strong> (Дата: @comment.Createdat.ToString("yyyy-MM-dd HH:mm"))</p>
                         <p>@comment.Content</p>
-                        @if (comment.Userid == int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)))
+                        @if (comment.Userid == currentUserId)
                         {
-                            <form asp-controller="Comment" asp-action="Delete" method="post">
-                                <input type="hidden" name="articleId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                            <form method="post" action="@Url.Action("Edit", "Comment", new { articleId = Model.Id })">
+                                <textarea name="newContent" class="form-control" required>@comment.Content</textarea>
+                                <button type="submit" class="btn btn-secondary mt-2">Изменить</button>
                             </form>
-
+                            <form method="post" action="@Url.Action("Delete", "Comment", new { articleId = Model.Id })" class="mt-2">
+                                <button type="submit" class="btn btn-danger">Удалить</button>
+                            </form>
                         }
                     </div>
                 }
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                    var userComment = Model.Comments.FirstOrDefault(c => c.Userid == int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)));
+                    var userComment = Model.Comments.FirstOrDefault(c => c.Userid == currentUserId);
 
                     if (userComment == null)
                     {
-                        <h4>Добавить комментарий</h4>
-                        <form method="post" asp-controller="Comment" asp-action="Add" asp-route-articleId="@Model.Id">
-                            @Html.AntiForgeryToken()
-                            <textarea name="content" class="form-control" placeholder="Ваш комментарий" required></textarea>
+                        <h4>Добавить рецензию</h4>
+                        <form method="post" action="@Url.Action("Add", "Comment", new { articleId = Model.Id })">
+                            <textarea name="content" class="form-control" placeholder="Ваша рецензия" required></textarea>
                             <button type="submit" class="btn btn-secondary mt-3">Отправить</button>
                         </form>
-
-
-
-
                     }
                     else
                     {
-                        <p><strong>Вы уже оставили комментарий к этой статье.</strong></p>
+                        <p><strong>Вы уже оставили рецензию к этой статье.</strong></p>
                     }
                 }
             </div>
         </div>
         <div class="card-footer">
-            <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-secondary">Редактировать</a>
+            @if (isOwner)
+            {
+                <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-primary">Редактировать</a>
+                <form method="post" action="@Url.Action("Delete", "Article", new { id = Model.Id })" class="d-inline-block">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            }
             <a href="@Url.Action("Articles", "Article")" class="btn btn-secondary">Назад</a>
         </div>
     </div>

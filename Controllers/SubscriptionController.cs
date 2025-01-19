@@ -108,5 +108,64 @@ namespace WebApplicationMVC.Controllers
 
             return RedirectToAction("Subscriptions", "Subscription");  
         }
+
+        [HttpGet("SearchSubscriptions")]
+        public async Task<IActionResult> SearchSubscriptions(string query, int? id)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Запрос не может быть пустым.");
+            }
+
+            if (!id.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null || !int.TryParse(userId, out int parsedId))
+                {
+                    return Unauthorized();
+                }
+                id = parsedId;
+            }
+
+            var subscriptions = await _context.Subscriptions
+                .Where(s => s.Subscriberid == id)
+                .Include(s => s.Author)
+                .Where(s => EF.Functions.Like(s.Author.Username, $"%{query}%") ||
+                            EF.Functions.Like(s.Author.Email, $"%{query}%") ||
+                            EF.Functions.Like(s.Author.Fullname, $"%{query}%"))
+                .ToListAsync();
+
+            return View(subscriptions);
+        }
+
+        [HttpGet("SearchSubscribers")]
+        public async Task<IActionResult> SearchSubscribers(string query, int? id)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Запрос не может быть пустым.");
+            }
+
+            if (!id.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null || !int.TryParse(userId, out int parsedId))
+                {
+                    return Unauthorized();
+                }
+                id = parsedId;
+            }
+
+            var subscribers = await _context.Subscriptions
+                .Where(s => s.Authorid == id)
+                .Include(s => s.Subscriber)
+                .Where(s => EF.Functions.Like(s.Subscriber.Username, $"%{query}%") ||
+                            EF.Functions.Like(s.Subscriber.Email, $"%{query}%") ||
+                            EF.Functions.Like(s.Subscriber.Fullname, $"%{query}%"))
+                .ToListAsync();
+
+            return View(subscribers);
+        }
+
     }
 }

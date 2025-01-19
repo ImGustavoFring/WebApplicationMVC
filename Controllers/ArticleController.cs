@@ -28,7 +28,7 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(string title, string content, int visibilityId, string tagNames)
+        public async Task<IActionResult> Create(string title, string content, int visibilityId, string tagNames, string? previewUrl)
         {
             if (ModelState.IsValid)
             {
@@ -56,7 +56,8 @@ namespace WebApplicationMVC.Controllers
                     Content = content,
                     Visibilityid = visibilityId,
                     Userid = userId,
-                    Tags = tags
+                    Tags = tags,
+                    Previewurl = previewUrl
                 };
 
                 _context.Articles.Add(article);
@@ -127,9 +128,9 @@ namespace WebApplicationMVC.Controllers
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (article == null)
+            if (article == null || article.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
-                return NotFound();
+                return Forbid();
             }
 
             ViewBag.VisibilityOptions = await _context.Visibilities.ToListAsync();
@@ -138,16 +139,16 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> Edit(int id, string title, string content, int visibilityId, string tagNames)
+        public async Task<IActionResult> Edit(int id, string title, string content, int visibilityId, string tagNames, string? previewUrl)
         {
             var existingArticle = await _context.Articles
                 .Include(a => a.Tags)
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (existingArticle == null)
+            if (existingArticle == null || existingArticle.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
-                return NotFound();
+                return Forbid();
             }
 
             var visibility = await _context.Visibilities.FirstOrDefaultAsync(v => v.Id == visibilityId);
@@ -162,6 +163,7 @@ namespace WebApplicationMVC.Controllers
             existingArticle.Title = title;
             existingArticle.Content = content;
             existingArticle.Visibilityid = visibility.Id;
+            existingArticle.Previewurl = previewUrl;
 
             var tagArray = tagNames.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                        .Select(t => t.Trim())
@@ -215,6 +217,28 @@ namespace WebApplicationMVC.Controllers
 
             await _context.SaveChangesAsync();
             return tags;
+        }
+
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search(string query, int? id)
+        {
+            if (!id.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (userId == null || !int.TryParse(userId, out int parsedId))
+                {
+                    return Unauthorized();
+                }
+                id = parsedId;
+            }
+
+            var articles = await _context.Articles
+                .Where(a => a.Userid == id &&
+                            (a.Title.Contains(query) || a.Content.Contains(query)))
+                .ToListAsync();
+
+            return View(articles);
         }
     }
 }

@@ -2,11 +2,11 @@
 
 @{
     Layout = "_MainLayout";
-    ViewData["Title"] = "Подписки пользователя";
+    ViewData["Title"] = "Результаты поиска подписок";
 }
 
 <div class="container mt-5">
-    <h2>Подписки пользователя</h2>
+    <h2>Результаты поиска подписок</h2>
 
     <form action="@Url.Action("SearchSubscriptions", "Subscription")" method="get" class="d-flex mb-4" onsubmit="return validateSearchQuery();">
         <input id="searchQuery" type="text" name="query" class="form-control me-2" placeholder="Введите запрос для поиска подписок..." />
@@ -15,7 +15,7 @@
 
     @if (!Model.Any())
     {
-        <p>У пользователя нет подписок.</p>
+        <p>Подписки не найдены.</p>
     }
     else
     {

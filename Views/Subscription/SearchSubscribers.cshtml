@@ -2,27 +2,27 @@
 
 @{
     Layout = "_MainLayout";
-    ViewData["Title"] = "Подписки пользователя";
+    ViewData["Title"] = "Результаты поиска подписчиков";
 }
 
 <div class="container mt-5">
-    <h2>Подписки пользователя</h2>
+    <h2>Результаты поиска подписчиков</h2>
 
-    <form action="@Url.Action("SearchSubscriptions", "Subscription")" method="get" class="d-flex mb-4" onsubmit="return validateSearchQuery();">
-        <input id="searchQuery" type="text" name="query" class="form-control me-2" placeholder="Введите запрос для поиска подписок..." />
+    <form action="@Url.Action("SearchSubscribers", "Subscription")" method="get" class="d-flex mb-4" onsubmit="return validateSearchQuery();">
+        <input id="searchQuery" type="text" name="query" class="form-control me-2" placeholder="Введите запрос для поиска подписчиков..." />
         <button type="submit" class="btn btn-primary">Найти</button>
     </form>
 
     @if (!Model.Any())
     {
-        <p>У пользователя нет подписок.</p>
+        <p>Подписчики не найдены.</p>
     }
     else
     {
         <table class="table">
             <thead>
                 <tr>
-                    <th>Автор</th>
+                    <th>Подписчик</th>
                     <th>Дата подписки</th>
                     <th>Действия</th>
                 </tr>
@@ -31,10 +31,10 @@
                 @foreach (var subscription in Model)
                 {
                     <tr>
-                        <td>@subscription.Author.Fullname</td>
+                        <td>@subscription.Subscriber.Fullname</td>
                         <td>@subscription.Createdat.ToString("yyyy-MM-dd")</td>
                         <td>
-                            <a href="@Url.Action("Details", "User", new { id = subscription.Author.Id })" class="btn btn-secondary">Просмотр профиля</a>
+                            <a href="@Url.Action("Details", "User", new { id = subscription.Subscriber.Id })" class="btn btn-secondary">Просмотр профиля</a>
                         </td>
                     </tr>
                 }

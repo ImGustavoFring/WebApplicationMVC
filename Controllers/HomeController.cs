@@ -18,64 +18,31 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString = "", string criterion = "date", string order = "desc")
         {
-            var articles = await _context.Articles
-                                         .Include(a => a.Tags)
-                                         .Include(a => a.User)
-                                         .Include(a => a.Views)
-                                         .Include(a => a.Ratings)
-                                         .OrderByDescending(a => a.Createdat)
-                                         .ToListAsync();
+            var query = _context.Articles
+                                .Include(a => a.Tags)
+                                .Include(a => a.User)
+                                .Include(a => a.Views)
+                                .Include(a => a.Ratings)
+                                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(a => a.Title.Contains(searchString) ||
+                                         (a.User != null && a.User.Username.Contains(searchString)));
+            }
+
+            query = criterion switch
+            {
+                "title" => order == "asc" ? query.OrderBy(a => a.Title) : query.OrderByDescending(a => a.Title),
+                "author" => order == "asc" ? query.OrderBy(a => a.User.Username) : query.OrderByDescending(a => a.User.Username),
+                _ => order == "asc" ? query.OrderBy(a => a.Createdat) : query.OrderByDescending(a => a.Createdat),
+            };
+
+            var articles = await query.ToListAsync();
 
             ViewData["Tags"] = await _context.Tags.ToListAsync();
-
-            return View(articles);
-        }
-
-        [HttpGet("Search")]
-        public async Task<IActionResult> Search(string searchString, string criterion = "date", string order = "desc")
-        {
-            if (string.IsNullOrEmpty(searchString))
-            {
-                return View(new List<Article>());
-            }
-
-            var articlesQuery = _context.Articles
-                .Where(a => a.Title.Contains(searchString));
-
-            switch (criterion.ToLower())
-            {
-                case "views":
-                    articlesQuery = order == "desc"
-                        ? articlesQuery.OrderByDescending(a => a.Views.Count)
-                        : articlesQuery.OrderBy(a => a.Views.Count);
-                    break;
-                case "comments":
-                    articlesQuery = order == "desc"
-                        ? articlesQuery.OrderByDescending(a => a.Comments.Count)
-                        : articlesQuery.OrderBy(a => a.Comments.Count);
-                    break;
-                case "ratings":
-                    articlesQuery = order == "desc"
-                        ? articlesQuery.OrderByDescending(a => a.Ratings.Count)
-                        : articlesQuery.OrderBy(a => a.Ratings.Count);
-                    break;
-                case "date":
-                default:
-                    articlesQuery = order == "desc"
-                        ? articlesQuery.OrderByDescending(a => a.Createdat)
-                        : articlesQuery.OrderBy(a => a.Createdat);
-                    break;
-            }
-
-            var articles = await articlesQuery
-                .Include(a => a.Tags)
-                .Include(a => a.User)
-                .Include(a => a.Views)
-                .Include(a => a.Ratings)
-                .Include(a => a.Comments)
-                .ToListAsync();
 
             return View(articles);
         }

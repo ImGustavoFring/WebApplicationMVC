@@ -1,0 +1,123 @@
+﻿@model IEnumerable<(DateOnly Day, int TotalCount)>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var dates = Model.Select(v => v.Day.ToString("yyyy-MM-dd")).ToArray();
+    var counts = Model.Select(v => v.TotalCount).ToArray();
+
+    // Применим метод скользящего среднего для прогнозирования
+    int windowSize = 3; // Размер окна для скользящего среднего (например, 3 дня)
+    var smoothedCounts = new List<int>();
+
+    for (int i = 0; i < counts.Length; i++)
+    {
+        var start = Math.Max(0, i - windowSize + 1);
+        var window = counts.Skip(start).Take(windowSize);
+        var average = (int)window.Average();
+        smoothedCounts.Add(average);
+    }
+
+    // Прогнозируем будущие дни (например, 7 дней)
+    var futureDates = new List<string>();
+    var futureCounts = new List<int>();
+
+    DateOnly lastDate = Model.Last().Day;
+    for (int i = 1; i <= 7; i++)
+    {
+        var futureDate = lastDate.AddDays(i);
+        futureDates.Add(futureDate.ToString("yyyy-MM-dd"));
+        futureCounts.Add(smoothedCounts.Last()); // Прогнозируем на основе последнего значения скользящего среднего
+    }
+}
+
+<h2>Статистика посещений</h2>
+
+<canvas id="visitChart" width="800" height="400"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+<script>
+    const ctx = document.getElementById('visitChart').getContext('2d');
+    const visitChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(Json.Serialize(dates.Concat(futureDates))),
+            datasets: [{
+                label: 'Посещения за день',
+                data: @Html.Raw(Json.Serialize(counts.Concat(smoothedCounts))),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 1
+            },
+            {
+                label: 'Прогноз (скользящее среднее)',
+                data: @Html.Raw(Json.Serialize(futureCounts)),
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 1,
+                borderDash: [5, 5], // Точка-деши для линии прогноза
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Количество: ${context.raw}`;
+                        }
+                    }
+                },
+                legend: {
+                    display: true,
+                    labels: {
+                        color: 'black',
+                        font: {
+                            size: 14
+                        },
+                        generateLabels: function(chart) {
+                            return Chart.defaults.plugins.legend.labels.generateLabels(chart)
+                                .map(label => ({ ...label, text: label.text === 'Посещения за день' ? 'Посещения за день' : 'Прогноз (скользящее среднее)' }));
+                        }
+                    }
+                },
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: true
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        drag: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        mode: 'xy',
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy', 
+                        modifierKey: 'shift'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Дата'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Количество посещений'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
