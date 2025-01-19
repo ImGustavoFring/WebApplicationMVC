@@ -44,6 +44,23 @@ namespace WebApplicationMVC.Controllers
             return View(user);
         }
 
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return View("SearchResults", new List<User>());
+            }
+
+            var users = await _context.Users
+                .Where(u => EF.Functions.Like(u.Username, $"%{query}%") ||
+                            EF.Functions.Like(u.Email, $"%{query}%") ||
+                            EF.Functions.Like(u.Fullname, $"%{query}%"))
+                .ToListAsync();
+
+            return View("Search", users);
+        }
+
         [HttpGet("Edit")]
         public async Task<IActionResult> Edit()
         {

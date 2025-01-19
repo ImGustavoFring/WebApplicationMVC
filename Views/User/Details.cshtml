@@ -7,6 +7,13 @@
 }
 
 <div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
+    <div class="mb-4">
+        <form action="@Url.Action("Search", "User")" method="get" class="d-flex" onsubmit="return validateSearchQuery();">
+            <input id="searchQuery" type="text" name="query" class="form-control me-2" placeholder="Введите запрос для поиска пользователей..." />
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+    </div>
+
     <div class="card">
         <div class="card-header">
             <h2>Информация о пользователе</h2>
@@ -88,3 +95,14 @@
         </div>
     </div>
 </div>
+
+<script>
+    function validateSearchQuery() {
+        const query = document.getElementById('searchQuery').value.trim();
+        if (query === '') {
+            alert('Введите текст для поиска!');
+            return false;
+        }
+        return true;
+    }
+</script>
