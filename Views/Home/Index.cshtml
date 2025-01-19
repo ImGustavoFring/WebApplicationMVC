@@ -1,27 +1,54 @@
 ﻿@using WebApplicationMVC.Models
+@model List<Article>
 @{
     Layout = "_MainLayout";
     ViewData["Title"] = "Главная страница";
 }
 
 <div class="container mt-5">
-    <h2 class="mb-4">Теги</h2>
-
-    <div class="tag-list">
-        @foreach (var tag in ViewData["Tags"] as List<Tag>)
-        {
-            <div class="tag-item">
-                @tag.Name
+    <h2 class="mb-4">Поиск статей</h2>
+    <form method="get" action="@Url.Action("Index", "Home")" class="mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="searchString" class="form-control" placeholder="Введите поисковую строку" />
             </div>
+            <div class="col-md-3">
+                <select name="criterion" class="form-select">
+                    <option value="date" selected>Дата</option>
+                    <option value="title">Название</option>
+                    <option value="author">Автор</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="order" class="form-select">
+                    <option value="desc" selected>По убыванию</option>
+                    <option value="asc">По возрастанию</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Искать</button>
+            </div>
+        </div>
+    </form>
+
+    <h2 class="mb-4">Теги</h2>
+    <div class="tag-list mb-4">
+        @if (ViewData["Tags"] is List<Tag> tags)
+        {
+            foreach (var tag in tags)
+            {
+                <div class="tag-item">
+                    @tag.Name
+                </div>
+            }
         }
     </div>
 
     <h2 class="mb-4">Статьи</h2>
-
     <div class="list-group">
         @foreach (var article in Model)
         {
-            <div class="article-card">
+            <div class="article-card mb-4 p-3 border rounded">
                 <div class="d-flex flex-column">
                     <h4 class="mb-2">@article.Title</h4>
                     <p>
