@@ -218,5 +218,27 @@ namespace WebApplicationMVC.Controllers
             await _context.SaveChangesAsync();
             return tags;
         }
+
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search(string query, int? id)
+        {
+            if (!id.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (userId == null || !int.TryParse(userId, out int parsedId))
+                {
+                    return Unauthorized();
+                }
+                id = parsedId;
+            }
+
+            var articles = await _context.Articles
+                .Where(a => a.Userid == id &&
+                            (a.Title.Contains(query) || a.Content.Contains(query)))
+                .ToListAsync();
+
+            return View(articles);
+        }
     }
 }
