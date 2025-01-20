@@ -94,6 +94,10 @@
                 <h1><a href="@Url.Action("Index", "Home")">Computer World</a></h1>
             </div>
             <div class="header-right">
+                @if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
+                {
+                    <a class="header-right-link" href="@Url.Action("GetVisits", "Visit")">Посмотреть посещаемость</a>
+                }
                 <a class="header-right-link" href="@Url.Action("Create", "Article")">Написать статью</a>
                 <a class="header-right-link" href="@Url.Action("Details", "User")">Профиль</a>
             </div>

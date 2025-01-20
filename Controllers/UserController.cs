@@ -124,8 +124,22 @@ namespace WebApplicationMVC.Controllers
             existingUser.Roleid = role.Id;
             await _context.SaveChangesAsync();
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, existingUser.Username),
+                new Claim(ClaimTypes.Email, existingUser.Email),
+                new Claim(ClaimTypes.Role, role.Name),
+                new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+
             return RedirectToAction(nameof(Details));
         }
+
 
         [HttpPost("Delete")]
         public async Task<IActionResult> Delete()

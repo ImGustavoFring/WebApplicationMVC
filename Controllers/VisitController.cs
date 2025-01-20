@@ -4,7 +4,7 @@ using WebApplicationMVC.Services;
 
 namespace WebApplicationMVC.Controllers
 {
-    [Authorize(Policy = "UserPolicy")]
+    [Authorize(Policy = "AdminPolicy")]
     [Route("Visit")]
     public class VisitController : Controller
     {

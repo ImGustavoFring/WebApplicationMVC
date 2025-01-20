@@ -11,7 +11,7 @@ builder.Services.AddAuthentication("CookieAuth")
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Error/AccessDenied";
         options.Cookie.Name = "UserAuthCookie";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;

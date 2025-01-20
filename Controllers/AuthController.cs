@@ -97,8 +97,7 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Login");
         }
 
-        [Authorize(Policy = "UserPolicy")]
-        [HttpPost("Logout")]
+        [HttpGet("Logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("CookieAuth");
