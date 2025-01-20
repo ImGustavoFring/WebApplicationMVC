@@ -37,6 +37,7 @@
             <p><strong>Содержание:</strong> @Model.Content</p>
 
             <p><strong>Количество просмотров:</strong> @(Model.Views?.Count ?? 0)</p>
+            <p><strong>Количество оценок:</strong> @(Model.Ratings?.Count ?? 0)</p>
 
             <p>
                 <strong>Средняя оценка:</strong> @(Model.Ratings?.Any() == true

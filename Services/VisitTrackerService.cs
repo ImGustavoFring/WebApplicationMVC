@@ -14,13 +14,13 @@ namespace WebApplicationMVC.Services
         private void GenerateRandomVisits()
         {
             var random = new Random();
-            var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-365)); // Данные за последний год
+            var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-365));
 
             for (int i = 0; i < 10000; i++)
             {
                 var randomDay = startDate.AddDays(random.Next(0, 365));
-                var userId = random.Next(1, 101); // 100 уникальных пользователей
-                var count = random.Next(1, 5); // От 1 до 4 посещений в день
+                var userId = random.Next(1, 101);
+                var count = random.Next(1, 5);
 
                 var visit = _visits.FirstOrDefault(v => v.UserId == userId && v.Day == randomDay);
 

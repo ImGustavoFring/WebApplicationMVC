@@ -9,14 +9,14 @@
     <h2 class="mb-4">Поиск статей</h2>
     <form method="get" action="@Url.Action("Index", "Home")" class="mb-4">
         <div class="row g-3 align-items-center">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="searchString" class="form-control" placeholder="Введите поисковую строку" />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="criterion" class="form-select">
                     <option value="date" selected>Дата</option>
                     <option value="title">Название</option>
-                    <option value="author">Автор</option>
+                    <option value="views">Просмотры</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -26,23 +26,30 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <select name="filterBySubscription" class="form-select">
+                    <option value="all" selected>Все авторы</option>
+                    <option value="subscribed">Только подписанные авторы</option>
+                    <option value="own">Только свои статьи</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-grid gap-2">
                 <button type="submit" class="btn btn-primary">Искать</button>
             </div>
         </div>
-    </form>
 
-    <h2 class="mb-4">Теги</h2>
-    <div class="tag-list mb-4">
-        @if (ViewData["Tags"] is List<Tag> tags)
-        {
-            foreach (var tag in tags)
-            {
-                <div class="tag-item">
-                    @tag.Name
-                </div>
-            }
-        }
-    </div>
+        <div class="mt-4">
+            <h2>Фильтровать по тегам</h2>
+            <div class="btn-group d-inline-flex flex-wrap" role="group">
+                @foreach (var tag in (List<Tag>)ViewData["Tags"])
+                {
+                    <button type="submit" name="selectedTags" value="@tag.Id" class="btn @(Context.Request.Query["selectedTags"] == tag.Id.ToString() ? "btn-secondary" : "btn-outline-secondary") mb-2 me-2">
+                        @tag.Name
+                    </button>
+                }
+            </div>
+        </div>
+
+    </form>
 
     <h2 class="mb-4">Статьи</h2>
     <div class="list-group">
@@ -50,6 +57,11 @@
         {
             <div class="article-card mb-4 p-3 border rounded">
                 <div class="d-flex flex-column">
+                    @if (!string.IsNullOrEmpty(article.Previewurl))
+                    {
+                        <img src="@article.Previewurl" alt="Превью изображения" class="img-fluid mb-3" />
+                    }
+
                     <h4 class="mb-2">@article.Title</h4>
                     <p>
                         Автор:
@@ -68,6 +80,7 @@
                     </p>
                     <p>Дата публикации: @article.Createdat.ToString("dd.MM.yyyy HH:mm")</p>
                     <p>Просмотры: @(article.Views != null ? article.Views.Count : 0)</p>
+                    <p>Количество оценок: @(article.Ratings != null ? article.Ratings.Count : 0)</p>
 
                     <p>
                         Средняя оценка:
@@ -89,12 +102,14 @@
                         }
                     </p>
 
+                    <p>Комментарии: @(article.Comments != null ? article.Comments.Count : 0)</p>
+
                     <div>
                         @if (article.Tags != null && article.Tags.Count > 0)
                         {
                             foreach (var tag in article.Tags)
                             {
-                                <span class="badge bg-secondary me-2">@tag.Name</span>
+                                <span class="badge bg-secondary me-2 mb-2">@tag.Name</span>
                             }
                         }
                     </div>
@@ -105,3 +120,4 @@
         }
     </div>
 </div>
+
