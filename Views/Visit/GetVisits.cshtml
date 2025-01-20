@@ -1,14 +1,15 @@
-﻿@model IEnumerable<(DateOnly Day, int TotalCount)>
+﻿@model IEnumerable<(string Month, int TotalCount)>
 
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var dates = Model.Select(v => v.Day.ToString("yyyy-MM-dd")).ToArray();
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    var months = Model.Select(v => v.Month).ToArray();
     var counts = Model.Select(v => v.TotalCount).ToArray();
 
-    // Применим метод скользящего среднего для прогнозирования
-    int windowSize = 3; // Размер окна для скользящего среднего (например, 3 дня)
+    // Прогнозирование на основе скользящего среднего
+    int windowSize = 3; // Размер окна для скользящего среднего
     var smoothedCounts = new List<int>();
 
+    // Вычисляем скользящее среднее для исторических данных
     for (int i = 0; i < counts.Length; i++)
     {
         var start = Math.Max(0, i - windowSize + 1);
@@ -17,47 +18,77 @@
         smoothedCounts.Add(average);
     }
 
-    // Прогнозируем будущие дни (например, 7 дней)
-    var futureDates = new List<string>();
+    // Прогнозируем будущие месяцы (например, 3 месяца)
+    var futureMonths = new List<string>();
     var futureCounts = new List<int>();
 
-    DateOnly lastDate = Model.Last().Day;
-    for (int i = 1; i <= 7; i++)
+    if (months.Any())
     {
-        var futureDate = lastDate.AddDays(i);
-        futureDates.Add(futureDate.ToString("yyyy-MM-dd"));
-        futureCounts.Add(smoothedCounts.Last()); // Прогнозируем на основе последнего значения скользящего среднего
+        var lastDate = DateTime.ParseExact(months.Last(), "yyyy-MM", null);
+        for (int i = 1; i <= 2; i++) // Прогнозируем 2 месяца вперед
+        {
+            var futureMonth = lastDate.AddMonths(i);
+            futureMonths.Add(futureMonth.ToString("yyyy-MM"));
+            futureCounts.Add(smoothedCounts.Last());
+        }
     }
 }
 
-<h2>Статистика посещений</h2>
+<h2>Статистика посещений (по месяцам)</h2>
 
-<canvas id="visitChart" width="800" height="400"></canvas>
+@if (!months.Any())
+{
+    <p>Данные для отображения графика отсутствуют.</p>
+}
+else
+{
+    <canvas id="visitChart" width="800" height="400"></canvas>
+}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 <script>
     const ctx = document.getElementById('visitChart').getContext('2d');
+
+    const labels = @Html.Raw(Json.Serialize(months.Concat(futureMonths)));
+    const counts = @Html.Raw(Json.Serialize(counts));
+    const smoothedCounts = @Html.Raw(Json.Serialize(smoothedCounts));
+    const futureCounts = Array(counts.length).fill(null).concat(@Html.Raw(Json.Serialize(futureCounts)));
+
+    console.log("Labels:", labels);
+    console.log("Counts:", counts);
+    console.log("Smoothed Counts:", smoothedCounts);
+    console.log("Future Counts:", futureCounts);
+
     const visitChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: @Html.Raw(Json.Serialize(dates.Concat(futureDates))),
-            datasets: [{
-                label: 'Посещения за день',
-                data: @Html.Raw(Json.Serialize(counts.Concat(smoothedCounts))),
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderWidth: 1
-            },
-            {
-                label: 'Прогноз (скользящее среднее)',
-                data: @Html.Raw(Json.Serialize(futureCounts)),
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderWidth: 1,
-                borderDash: [5, 5],
-                fill: false
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Посещения за месяц',
+                    data: counts,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Скользящее среднее (исторические данные)',
+                    data: smoothedCounts,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderWidth: 1,
+                    borderDash: [5, 5]
+                },
+                {
+                    label: 'Прогноз (будущие месяцы)',
+                    data: futureCounts,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    fill: false
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -70,44 +101,14 @@
                     }
                 },
                 legend: {
-                    display: true,
-                    labels: {
-                        color: 'black',
-                        font: {
-                            size: 14
-                        },
-                        generateLabels: function(chart) {
-                            return Chart.defaults.plugins.legend.labels.generateLabels(chart)
-                                .map(label => ({ ...label, text: label.text === 'Посещения за день' ? 'Посещения за день' : 'Прогноз (скользящее среднее)' }));
-                        }
-                    }
+                    display: true
                 },
-                zoom: {
-                    zoom: {
-                        wheel: {
-                            enabled: true
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        drag: {
-                            enabled: true,
-                            backgroundColor: 'rgba(0, 0, 0, 0.1)'
-                        },
-                        mode: 'xy',
-                    },
-                    pan: {
-                        enabled: true,
-                        mode: 'xy', 
-                        modifierKey: 'shift'
-                    }
-                }
             },
             scales: {
                 x: {
                     title: {
                         display: true,
-                        text: 'Дата'
+                        text: 'Месяц'
                     }
                 },
                 y: {

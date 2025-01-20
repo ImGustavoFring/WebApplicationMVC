@@ -45,6 +45,10 @@
                 @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 {
                     <a class="btn btn-primary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
+
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-secondary" style="border: 1px solid #6c757d; background-color: transparent; color: #6c757d; margin-right: 10px;">Выйти</a>
+
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить аккаунт</button>
                 }
 
                 @if (Model.Id != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
@@ -65,11 +69,6 @@
                             <button type="submit" class="btn btn-danger" style="margin-right: 10px;">Отписаться</button>
                         </form>
                     }
-                }
-
-                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-                {
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить аккаунт</button>
                 }
             </div>
         </div>

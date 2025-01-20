@@ -59,5 +59,14 @@ namespace WebApplicationMVC.Services
                 .Select(g => (g.Key, g.Sum(v => v.Count)))
                 .OrderBy(d => d.Key);
         }
+
+        public IEnumerable<(string Month, int TotalCount)> GetMonthlyVisits()
+        {
+            return _visits
+                .GroupBy(v => new { v.Day.Year, v.Day.Month })
+                .Select(g => ($"{g.Key.Year}-{g.Key.Month:00}", g.Sum(v => v.Count)))
+                .OrderBy(d => d.Item1);
+        }
+
     }
 }

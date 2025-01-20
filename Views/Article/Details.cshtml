@@ -12,7 +12,7 @@
     <div class="card">
         <div class="card-header">
             <h2>@Model.Title</h2>
-            <p><strong>Автор:</strong> @Model.User?.Username</p>
+            <p><strong>Автор: <a href="@Url.Action("Details", "User", new { id = Model.User?.Id })">@Model.User?.Username</a></strong></p>
 
             <p><strong>Теги:</strong></p>
             <ul>
