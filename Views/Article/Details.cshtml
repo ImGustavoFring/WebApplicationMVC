@@ -6,6 +6,7 @@
 
     var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     var isOwner = Model.Userid == currentUserId;
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-5" style="margin-top: 100px; margin-bottom: 100px;">
@@ -72,7 +73,6 @@
                     </div>
                 }
 
-
                 @if (User.Identity.IsAuthenticated)
                 {
                     var userComment = Model.Comments.FirstOrDefault(c => c.Userid == currentUserId);
@@ -119,7 +119,7 @@
 
         </div>
         <div class="card-footer">
-            @if (isOwner)
+            @if (isOwner || isAdmin)
             {
                 <a href="@Url.Action("Edit", "Article", new { id = Model.Id })" class="btn btn-primary">Редактировать</a>
                 <form method="post" action="@Url.Action("Delete", "Article", new { id = Model.Id })" class="d-inline-block">
