@@ -129,7 +129,7 @@ namespace WebApplicationMVC.Controllers
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (article == null || article.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if (article == null || !(article.Userid == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || User.IsInRole("Admin")))
             {
                 return Forbid();
             }
@@ -147,7 +147,7 @@ namespace WebApplicationMVC.Controllers
                 .Include(a => a.Visibility)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (existingArticle == null || existingArticle.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if (existingArticle == null || !(existingArticle.Userid == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || User.IsInRole("Admin")))
             {
                 return Forbid();
             }
@@ -184,13 +184,12 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction(nameof(Details), new { id = existingArticle.Id });
         }
 
-
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var article = await _context.Articles.FirstOrDefaultAsync(a => a.Id == id);
 
-            if (article == null || article.Userid != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            if (article == null || !(article.Userid == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || User.IsInRole("Admin")))
             {
                 return Forbid();
             }
