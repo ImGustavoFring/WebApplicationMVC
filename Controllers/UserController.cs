@@ -62,16 +62,23 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpGet("Edit")]
-        public async Task<IActionResult> Edit()
+        public async Task<IActionResult> Edit(int? id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null || !int.TryParse(userId, out int parsedId))
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int currentUserId))
             {
                 return Unauthorized();
             }
 
-            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == parsedId);
+            var targetUserId = id ?? currentUserId;
+
+            if (targetUserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Id == targetUserId);
 
             if (user == null)
             {
@@ -86,19 +93,27 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Edit")]
-        public async Task<IActionResult> Edit(int RoleId,
+        public async Task<IActionResult> Edit(int? id, int RoleId,
             string Username, string Email,
             string Fullname, string Bio,
-            string Contactinfo, string Avatarurl)
+            string Contactinfo, string Avatarurl,
+            string newPassword, string newConfirmedPassword)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null || !int.TryParse(userId, out int parsedId))
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int currentUserId))
             {
                 return Unauthorized();
             }
 
-            var existingUser = await _context.Users.FindAsync(parsedId);
+            var targetUserId = id ?? currentUserId;
+
+            if (targetUserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var existingUser = await _context.Users.FindAsync(targetUserId);
 
             if (existingUser == null)
             {
@@ -112,45 +127,75 @@ namespace WebApplicationMVC.Controllers
             existingUser.Contactinfo = Contactinfo;
             existingUser.Avatarurl = Avatarurl;
 
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == RoleId);
-            if (role == null)
+            // Изменение пароля
+            if (!string.IsNullOrEmpty(newPassword) || !string.IsNullOrEmpty(newConfirmedPassword))
             {
-                ModelState.AddModelError("RoleId", "Invalid role.");
-                var roles = await _context.Roles.ToListAsync();
-                ViewBag.Roles = roles;
-                return View(existingUser);
+                if (newPassword != newConfirmedPassword)
+                {
+                    ModelState.AddModelError("newPassword", "Пароли не совпадают.");
+                    var roles = await _context.Roles.ToListAsync();
+                    ViewBag.Roles = roles;
+                    return View(existingUser);
+                }
+
+                existingUser.Passwordhash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             }
 
-            existingUser.Roleid = role.Id;
+            // Изменение роли доступно только админу
+            if (User.IsInRole("Admin"))
+            {
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == RoleId);
+                if (role == null)
+                {
+                    ModelState.AddModelError("RoleId", "Недопустимая роль.");
+                    var roles = await _context.Roles.ToListAsync();
+                    ViewBag.Roles = roles;
+                    return View(existingUser);
+                }
+
+                existingUser.Roleid = role.Id;
+            }
+
             await _context.SaveChangesAsync();
 
-            var claims = new[]
+            // Обновление аутентификационной информации для текущего пользователя
+            if (currentUserId == targetUserId)
             {
-                new Claim(ClaimTypes.Name, existingUser.Username),
-                new Claim(ClaimTypes.Email, existingUser.Email),
-                new Claim(ClaimTypes.Role, role.Name),
-                new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
-            };
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, existingUser.Username),
+                    new Claim(ClaimTypes.Email, existingUser.Email),
+                    new Claim(ClaimTypes.Role, User.IsInRole("Admin") ? "Admin" : existingUser.Role?.Name ?? "User"), // Проверка на null
+                    new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
+                };
 
-            var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-            await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+                await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+            }
 
-            return RedirectToAction(nameof(Details));
+            return RedirectToAction(nameof(Details), new { id = targetUserId });
         }
 
 
         [HttpPost("Delete")]
-        public async Task<IActionResult> Delete()
+        public async Task<IActionResult> Delete(int? id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null || !int.TryParse(userId, out int parsedId))
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int currentUserId))
             {
                 return Unauthorized();
             }
 
-            var user = await _context.Users.FindAsync(parsedId);
+            var targetUserId = id ?? currentUserId;
+
+            if (targetUserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var user = await _context.Users.FindAsync(targetUserId);
 
             if (user == null)
             {
@@ -160,8 +205,13 @@ namespace WebApplicationMVC.Controllers
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Register", "Auth");
+            if (currentUserId == targetUserId)
+            {
+                await HttpContext.SignOutAsync();
+                return RedirectToAction("Logout", "Auth");
+            }
+
+            return RedirectToAction("Details", "User", new { id = currentUserId });
         }
     }
 }

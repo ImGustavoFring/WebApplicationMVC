@@ -58,15 +58,30 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Роль:</strong></label>
-                    <select name="roleId" class="form-select" required>
-                        @foreach (var role in ViewBag.Roles as List<Role>)
-                        {
-                            <option value="@role.Id">@role.Name</option>
-                        }
-                    </select>
+                    <label class="form-label"><strong>Новый пароль:</strong></label>
+                    <input name="newPassword" type="password" class="form-control" placeholder="Введите новый пароль" />
                     <span class="text-danger"></span>
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Подтвердите новый пароль:</strong></label>
+                    <input name="newConfirmedPassword" type="password" class="form-control" placeholder="Подтвердите новый пароль" />
+                    <span class="text-danger"></span>
+                </div>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Роль:</strong></label>
+                        <select name="RoleId" class="form-select" required>
+                            @foreach (var role in ViewBag.Roles as List<Role>)
+                            {
+                                <option value="@role.Id" @(role.Id == Model.Roleid ? "selected" : "")>@role.Name</option>
+                            }
+                        </select>
+                        <span class="text-danger"></span>
+                    </div>
+                }
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success">Сохранить</button>

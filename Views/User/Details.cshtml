@@ -42,7 +42,12 @@
                 <a class="btn btn-secondary" href="@Url.Action("Subscriptions", "Subscription", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписки</a>
                 <a class="btn btn-secondary" href="@Url.Action("Subscribers", "Subscription", new { id = Model.Id })" style="margin-right: 10px;">Посмотреть подписчиков</a>
 
-                @if (Model.Id == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                @{
+                    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    var isAdmin = User.IsInRole("Admin");
+                }
+
+                @if (Model.Id == currentUserId)
                 {
                     <a class="btn btn-primary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать профиль</a>
 
@@ -50,11 +55,15 @@
 
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить аккаунт</button>
                 }
-
-                @if (Model.Id != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                else if (isAdmin)
                 {
-                    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    <a class="btn btn-primary" href="@Url.Action("Edit", "User", new { id = Model.Id })" style="margin-right: 10px;">Редактировать</a>
 
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" style="margin-right: 10px;">Удалить</button>
+                }
+
+                @if (Model.Id != currentUserId && !isAdmin)
+                {
                     var isSubscribed = Model.SubscriptionAuthors.Any(s => s.Subscriberid == currentUserId);
 
                     if (!isSubscribed)
@@ -83,7 +92,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Вы уверены, что хотите удалить свой аккаунт? Это действие невозможно отменить.
+                Вы уверены, что хотите удалить аккаунт? Это действие невозможно отменить.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
