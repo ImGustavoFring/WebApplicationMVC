@@ -67,6 +67,5 @@ namespace WebApplicationMVC.Services
                 .Select(g => ($"{g.Key.Year}-{g.Key.Month:00}", g.Sum(v => v.Count)))
                 .OrderBy(d => d.Item1);
         }
-
     }
 }
