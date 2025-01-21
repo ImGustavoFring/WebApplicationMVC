@@ -76,6 +76,7 @@ namespace WebApplicationMVC.Controllers
             var article = await _context.Articles
                 .Include(a => a.User)
                 .Include(a => a.Comments)
+                    .ThenInclude(c => c.User)
                 .Include(a => a.Tags)
                 .Include(a => a.Views)
                 .Include(a => a.Visibility)
