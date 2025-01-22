@@ -52,21 +52,29 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Update")]
-        public async Task<IActionResult> Update(int articleId, int value)
+        public async Task<IActionResult> Update(int articleId, int value, int? userId)
         {
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
             if (value < 1 || value > 10)
             {
                 return RedirectToAction("Details", "Article", new { id = articleId });
             }
 
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var existingRating = await _context.Ratings
-                .FirstOrDefaultAsync(r => r.Articleid == articleId && r.Userid == userId);
+                .FirstOrDefaultAsync(r => r.Articleid == articleId && (r.Userid == userId || User.IsInRole("Admin")));
 
             if (existingRating == null)
             {
                 return RedirectToAction("Details", "Article", new { id = articleId });
+            }
+
+            if (existingRating.Userid != userId && !User.IsInRole("Admin"))
+            {
+                return Unauthorized();
             }
 
             existingRating.Value = value;
@@ -75,13 +83,17 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
+
         [HttpPost("Delete")]
-        public async Task<IActionResult> Delete(int articleId)
+        public async Task<IActionResult> Delete(int articleId, int? userId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
             var existingRating = await _context.Ratings
-                .FirstOrDefaultAsync(r => r.Articleid == articleId && r.Userid == userId);
+                .FirstOrDefaultAsync(r => r.Articleid == articleId && (r.Userid == userId || User.IsInRole("Admin")));
 
             if (existingRating == null)
             {

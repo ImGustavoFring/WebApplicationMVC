@@ -46,16 +46,25 @@ namespace WebApplicationMVC.Controllers
         }
 
         [HttpPost("Edit/{articleId}")]
-        public async Task<IActionResult> Edit(int articleId, string newContent)
+        public async Task<IActionResult> Edit(int articleId, string newContent, int? userId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
             var comment = await _context.Comments
-                .FirstOrDefaultAsync(c => c.Articleid == articleId && c.Userid == userId);
+                .FirstOrDefaultAsync(c => c.Articleid == articleId && (c.Userid == userId || User.IsInRole("Admin")));
 
             if (comment == null)
             {
                 return RedirectToAction("Details", "Article", new { id = articleId });
+            }
+
+            // Проверяем, имеет ли пользователь права для изменения
+            if (comment.Userid != userId && !User.IsInRole("Admin"))
+            {
+                return Unauthorized();
             }
 
             comment.Content = newContent;
@@ -66,13 +75,17 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
 
+
         [HttpPost("Delete/{articleId}")]
-        public async Task<IActionResult> Delete(int articleId)
+        public async Task<IActionResult> Delete(int articleId, int? userId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
             var comment = await _context.Comments
-                .FirstOrDefaultAsync(c => c.Articleid == articleId && c.Userid == userId);
+                .FirstOrDefaultAsync(c => c.Articleid == articleId && (c.Userid == userId || User.IsInRole("Admin")));
 
             if (comment == null)
             {
@@ -85,4 +98,5 @@ namespace WebApplicationMVC.Controllers
             return RedirectToAction("Details", "Article", new { id = articleId });
         }
     }
+
 }
