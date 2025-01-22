@@ -76,12 +76,15 @@
                         <select name="RoleId" class="form-select" required>
                             @foreach (var role in ViewBag.Roles as List<Role>)
                             {
-                                <option value="@role.Id" @(role.Id == Model.Roleid ? "selected" : "")>@role.Name</option>
+                                <option value="@role.Id" @(role.Id == Model.Roleid ? "selected" : "")>
+                                    @(role.Name == "Admin" ? "Администратор" : (role.Name == "User" ? "Пользователь" : "Неизвестная роль"))
+                                </option>
                             }
                         </select>
                         <span class="text-danger"></span>
                     </div>
                 }
+
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success">Сохранить</button>
