@@ -44,11 +44,20 @@
                     <select name="visibilityId" class="form-select" required>
                         @foreach (var visibility in ViewBag.VisibilityOptions as List<Visibility>)
                         {
-                            <option value="@visibility.Id">@visibility.Name</option>
+                            var visibilityNameLocalized = visibility.Name switch
+                            {
+                                "Public" => "Публичная",
+                                "Private" => "Приватная",
+                                _ => visibility.Name //
+                            };
+                            <option value="@visibility.Id" @(visibility.Id == Model.Visibilityid ? "selected" : null)>
+                                @visibilityNameLocalized
+                            </option>
                         }
                     </select>
                     <span class="text-danger"></span>
                 </div>
+
 
                 <div class="mb-3">
                     <label class="form-label"><strong>Теги:</strong></label>
