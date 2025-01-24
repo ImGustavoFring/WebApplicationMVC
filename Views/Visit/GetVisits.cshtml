@@ -5,33 +5,14 @@
     var months = Model.Select(v => v.Month).ToArray();
     var counts = Model.Select(v => v.TotalCount).ToArray();
 
-    // Прогнозирование на основе скользящего среднего
-    int windowSize = 3; // Размер окна для скользящего среднего
-    var smoothedCounts = new List<int>();
+    // Определим последние 3 месяца
+    var last3MonthsIndexStart = months.Length - 3;
+    var last3Months = months.Skip(last3MonthsIndexStart).ToArray();
+    var last3Counts = counts.Skip(last3MonthsIndexStart).ToArray();
 
-    // Вычисляем скользящее среднее для исторических данных
-    for (int i = 0; i < counts.Length; i++)
-    {
-        var start = Math.Max(0, i - windowSize + 1);
-        var window = counts.Skip(start).Take(windowSize);
-        var average = (int)window.Average();
-        smoothedCounts.Add(average);
-    }
-
-    // Прогнозируем будущие месяцы (например, 3 месяца)
-    var futureMonths = new List<string>();
-    var futureCounts = new List<int>();
-
-    if (months.Any())
-    {
-        var lastDate = DateTime.ParseExact(months.Last(), "yyyy-MM", null);
-        for (int i = 1; i <= 2; i++) // Прогнозируем 2 месяца вперед
-        {
-            var futureMonth = lastDate.AddMonths(i);
-            futureMonths.Add(futureMonth.ToString("yyyy-MM"));
-            futureCounts.Add(smoothedCounts.Last());
-        }
-    }
+    // Все месяцы и их количество
+    var allMonths = months.ToArray();
+    var allCounts = counts.ToArray();
 }
 
 <h2>Статистика посещений (по месяцам)</h2>
@@ -49,46 +30,37 @@ else
 <script>
     const ctx = document.getElementById('visitChart').getContext('2d');
 
-    const labels = @Html.Raw(Json.Serialize(months.Concat(futureMonths)));
-    const counts = @Html.Raw(Json.Serialize(counts));
-    const smoothedCounts = @Html.Raw(Json.Serialize(smoothedCounts));
-    const futureCounts = Array(counts.length).fill(null).concat(@Html.Raw(Json.Serialize(futureCounts)));
+    const allLabels = @Html.Raw(Json.Serialize(allMonths));
+    const allCounts = @Html.Raw(Json.Serialize(allCounts));
 
-    console.log("Labels:", labels);
-    console.log("Counts:", counts);
-    console.log("Smoothed Counts:", smoothedCounts);
-    console.log("Future Counts:", futureCounts);
+    // Выделяем последние 3 месяца красным
+    const highlightedCounts = allCounts.map((count, index) => {
+        return {
+            x: allLabels[index],
+            y: count,
+            backgroundColor: (index >= allLabels.length - 3) ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)', // Красный для последних 3 месяцев
+            borderColor: (index >= allLabels.length - 3) ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)',
+            pointBackgroundColor: (index >= allLabels.length - 3) ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)',
+            pointBorderColor: (index >= allLabels.length - 3) ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'
+        };
+    });
 
     const visitChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Посещения за месяц',
-                    data: counts,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Скользящее среднее (исторические данные)',
-                    data: smoothedCounts,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderWidth: 1,
-                    borderDash: [5, 5]
-                },
-                {
-                    label: 'Прогноз (будущие месяцы)',
-                    data: futureCounts,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderWidth: 1,
-                    borderDash: [5, 5],
-                    fill: false
-                }
-            ]
+            labels: allLabels,
+            datasets: [{
+                label: 'Фактические посещения за месяц',
+                data: highlightedCounts.map(point => point.y), // Значения для линии
+                borderColor: 'rgba(75, 192, 192, 1)', // Цвет линии по умолчанию
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Легкая заливка по умолчанию
+                borderWidth: 2,
+                fill: true,
+                pointBackgroundColor: highlightedCounts.map(point => point.pointBackgroundColor), // Точки с выделением
+                pointBorderColor: highlightedCounts.map(point => point.pointBorderColor), // Границы точек с выделением
+                // Добавим разные цвета для легенды
+                pointRadius: 5
+            }]
         },
         options: {
             responsive: true,
@@ -101,7 +73,20 @@ else
                     }
                 },
                 legend: {
-                    display: true
+                    display: true,
+                    labels: {
+                        generateLabels: function(chart) {
+                            let original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            // Добавим новые элементы для легенды
+                            original.push({
+                                text: 'Предсказанные посещения (последние 3 месяца)',
+                                fillStyle: 'rgba(255, 99, 132, 1)', // Красный для последних 3 месяцев
+                                strokeStyle: 'rgba(255, 99, 132, 1)',
+                                lineWidth: 3
+                            });
+                            return original;
+                        }
+                    }
                 },
             },
             scales: {
