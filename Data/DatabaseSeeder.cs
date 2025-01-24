@@ -38,27 +38,39 @@ public class Seeder
             context.Users.AddRange(
                 new User
                 {
-                    Username = "admin",
+                    Username = "Admin",
                     Email = "admin@example.com",
                     Passwordhash = BCrypt.Net.BCrypt.HashPassword("adminpassword"),
                     Roleid = adminRole.Id,
-                    Fullname = "Admin User",
+                    Fullname = "Администратор сайта",
                     Avatarurl = "https://example.com/admin-avatar.jpg",
-                    Bio = "Admin bio",
-                    Contactinfo = "admin-contact",
-                    Createdat = localNow 
+                    Bio = "Является администратором сайта и отвечает за управление контентом.",
+                    Contactinfo = "admin@example.com",
+                    Createdat = localNow
                 },
                 new User
                 {
-                    Username = "user",
-                    Email = "user@example.com",
-                    Passwordhash = BCrypt.Net.BCrypt.HashPassword("userpassword"),
+                    Username = "User1",
+                    Email = "user1@example.com",
+                    Passwordhash = BCrypt.Net.BCrypt.HashPassword("user1password"),
                     Roleid = userRole.Id,
-                    Fullname = "Regular User",
-                    Avatarurl = "https://example.com/user-avatar.jpg",
-                    Bio = "User bio",
-                    Contactinfo = "user-contact",
-                    Createdat = localNow  
+                    Fullname = "Пользователь Иванов",
+                    Avatarurl = "https://example.com/user1-avatar.jpg",
+                    Bio = "Любитель технологий и IT, пишет статьи об алгоритмах и программировании.",
+                    Contactinfo = "user1-contact@example.com",
+                    Createdat = localNow
+                },
+                new User
+                {
+                    Username = "User2",
+                    Email = "user2@example.com",
+                    Passwordhash = BCrypt.Net.BCrypt.HashPassword("user2password"),
+                    Roleid = userRole.Id,
+                    Fullname = "Пользователь Петров",
+                    Avatarurl = "https://example.com/user2-avatar.jpg",
+                    Bio = "Инженер-системщик с опытом работы в сетях и базах данных.",
+                    Contactinfo = "user2-contact@example.com",
+                    Createdat = localNow
                 }
             );
             context.SaveChanges();
@@ -68,9 +80,18 @@ public class Seeder
         if (!context.Tags.Any())
         {
             context.Tags.AddRange(
-                new Tag { Name = "Tech" },
-                new Tag { Name = "Programming" },
-                new Tag { Name = "C#" }
+                new Tag { Name = "Технологии" },
+                new Tag { Name = "Программирование" },
+                new Tag { Name = "C#" },
+                new Tag { Name = "Администрирование" },
+                new Tag { Name = "Алгоритмы и структуры данных" },
+                new Tag { Name = "Оптимизация" },
+                new Tag { Name = "Сборки компьютера" },
+                new Tag { Name = "Смартфоны" },
+                new Tag { Name = "Сети" },
+                new Tag { Name = "Базы Данных" },
+                new Tag { Name = "ИИ" },
+                new Tag { Name = "Безопасность" }
             );
             context.SaveChanges();
         }
@@ -78,50 +99,101 @@ public class Seeder
         // Articles
         if (!context.Articles.Any())
         {
-            var admin = context.Users.First(u => u.Username == "admin");
-            var visibility = context.Visibilities.First(v => v.Name == "Public");
+            var admin = context.Users.First(u => u.Username == "Admin");
+            var user1 = context.Users.First(u => u.Username == "User1");
+            var user2 = context.Users.First(u => u.Username == "User2");
+            var publicVisibility = context.Visibilities.First(v => v.Name == "Public");
 
-            var article1 = new Article
-            {
-                Title = "First Article",
-                Content = "This is the content of the first article.",
-                Userid = admin.Id,
-                Visibilityid = visibility.Id,
-                Createdat = localNow,
-                Tags = new List<Tag> {
-                    context.Tags.First(t => t.Name == "Tech"),
-                    context.Tags.First(t => t.Name == "Programming")
+            context.Articles.AddRange(
+                new Article
+                {
+                    Title = "Технологии будущего",
+                    Content = "В этой статье мы рассмотрим, как современные технологии влияют на будущее человечества.",
+                    Userid = admin.Id,
+                    Visibilityid = publicVisibility.Id,
+                    Createdat = localNow,
+                    Tags = new List<Tag>
+                    {
+                        context.Tags.First(t => t.Name == "Технологии"),
+                        context.Tags.First(t => t.Name == "ИИ")
+                    }
+                },
+                new Article
+                {
+                    Title = "Секреты программирования на C#",
+                    Content = "Глубокий обзор особенностей и приемов программирования на языке C#.",
+                    Userid = user1.Id,
+                    Visibilityid = publicVisibility.Id,
+                    Createdat = localNow,
+                    Tags = new List<Tag>
+                    {
+                        context.Tags.First(t => t.Name == "Программирование"),
+                        context.Tags.First(t => t.Name == "C#")
+                    }
+                },
+                new Article
+                {
+                    Title = "Оптимизация алгоритмов",
+                    Content = "Как улучшить производительность алгоритмов и структур данных в реальных проектах.",
+                    Userid = user2.Id,
+                    Visibilityid = publicVisibility.Id,
+                    Createdat = localNow,
+                    Tags = new List<Tag>
+                    {
+                        context.Tags.First(t => t.Name == "Алгоритмы и структуры данных"),
+                        context.Tags.First(t => t.Name == "Оптимизация")
+                    }
+                },
+                new Article
+                {
+                    Title = "Смартфоны: от выбора до оптимизации",
+                    Content = "Руководство по выбору и оптимальному использованию современных смартфонов.",
+                    Userid = user1.Id,
+                    Visibilityid = publicVisibility.Id,
+                    Createdat = localNow,
+                    Tags = new List<Tag>
+                    {
+                        context.Tags.First(t => t.Name == "Смартфоны"),
+                        context.Tags.First(t => t.Name == "Технологии")
+                    }
+                },
+                new Article
+                {
+                    Title = "Секреты баз данных",
+                    Content = "Основы и углубленные темы работы с современными базами данных.",
+                    Userid = user2.Id,
+                    Visibilityid = publicVisibility.Id,
+                    Createdat = localNow,
+                    Tags = new List<Tag>
+                    {
+                        context.Tags.First(t => t.Name == "Базы Данных"),
+                        context.Tags.First(t => t.Name == "Администрирование")
+                    }
                 }
-            };
-
-            var article2 = new Article
-            {
-                Title = "Second Article",
-                Content = "This is the content of the second article.",
-                Userid = admin.Id,
-                Visibilityid = visibility.Id,
-                Createdat = localNow,  
-                Tags = new List<Tag> {
-                    context.Tags.First(t => t.Name == "C#")
-                }
-            };
-
-            context.Articles.AddRange(article1, article2);
+            );
             context.SaveChanges();
         }
 
         // Comments
         if (!context.Comments.Any())
         {
-            var user = context.Users.First(u => u.Username == "user");
+            var user1 = context.Users.First(u => u.Username == "User1");
+            var user2 = context.Users.First(u => u.Username == "User2");
 
             context.Comments.AddRange(
                 new Comment
                 {
-                    Articleid = context.Articles.First(a => a.Title == "First Article").Id,
-                    Userid = user.Id,
-                    Content = "Great article!",
-                    Createdat = localNow 
+                    Articleid = context.Articles.First(a => a.Title == "Технологии будущего").Id,
+                    Userid = user1.Id,
+                    Content = "Очень интересная статья! Спасибо за полезную информацию.",
+                    Createdat = localNow
+                },
+                new Comment
+                {
+                    Articleid = context.Articles.First(a => a.Title == "Секреты программирования на C#").Id,
+                    Userid = user2.Id,
+                    Content = "Отличный обзор возможностей языка.",
+                    Createdat = localNow
                 }
             );
             context.SaveChanges();
@@ -130,15 +202,23 @@ public class Seeder
         // Ratings
         if (!context.Ratings.Any())
         {
-            var user = context.Users.First(u => u.Username == "user");
+            var user1 = context.Users.First(u => u.Username == "User1");
+            var user2 = context.Users.First(u => u.Username == "User2");
 
             context.Ratings.AddRange(
                 new Rating
                 {
-                    Articleid = context.Articles.First(a => a.Title == "First Article").Id,
-                    Userid = user.Id,
+                    Articleid = context.Articles.First(a => a.Title == "Технологии будущего").Id,
+                    Userid = user1.Id,
                     Value = 5,
-                    Createdat = localNow 
+                    Createdat = localNow
+                },
+                new Rating
+                {
+                    Articleid = context.Articles.First(a => a.Title == "Секреты программирования на C#").Id,
+                    Userid = user2.Id,
+                    Value = 4,
+                    Createdat = localNow
                 }
             );
             context.SaveChanges();
@@ -147,31 +227,28 @@ public class Seeder
         // Subscriptions
         if (!context.Subscriptions.Any())
         {
-            var subscriber = context.Users.First(u => u.Username == "user");
-            var author = context.Users.First(u => u.Username == "admin");
+            var user1 = context.Users.First(u => u.Username == "User1");
+            var user2 = context.Users.First(u => u.Username == "User2");
+            var admin = context.Users.First(u => u.Username == "Admin");
 
             context.Subscriptions.AddRange(
                 new Subscription
                 {
-                    Subscriberid = subscriber.Id,
-                    Authorid = author.Id,
-                    Createdat = localNow 
-                }
-            );
-            context.SaveChanges();
-        }
-
-        // Views
-        if (!context.Views.Any())
-        {
-            var user = context.Users.First(u => u.Username == "user");
-
-            context.Views.AddRange(
-                new View
+                    Subscriberid = user1.Id,
+                    Authorid = admin.Id,
+                    Createdat = localNow
+                },
+                new Subscription
                 {
-                    Articleid = context.Articles.First(a => a.Title == "First Article").Id,
-                    Userid = user.Id,
-                    Createdat = localNow 
+                    Subscriberid = user2.Id,
+                    Authorid = user1.Id,
+                    Createdat = localNow
+                },
+                new Subscription
+                {
+                    Subscriberid = admin.Id,
+                    Authorid = user2.Id,
+                    Createdat = localNow
                 }
             );
             context.SaveChanges();
