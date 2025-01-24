@@ -19,7 +19,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label"><strong>Ссылка на на превью статьи:</strong></label>
+                <label class="form-label"><strong>Ссылка на превью статьи:</strong></label>
                 <input name="previewUrl" id="previewUrl" class="form-control" placeholder="Введите ссылку на превью статьи" value="@Model.Previewurl" />
                 <span class="text-danger"></span>
             </div>
@@ -41,7 +41,13 @@
                 <select name="visibilityId" class="form-select">
                     @foreach (var visibility in ViewBag.VisibilityOptions as List<Visibility>)
                     {
-                        <option value="@visibility.Id">@visibility.Name</option>
+                        string displayName = visibility.Name switch
+                        {
+                            "Public" => "Публичная",
+                            "Private" => "Приватная",
+                            _ => visibility.Name // Если придет что-то другое, выводим как есть
+                        };
+                        <option value="@visibility.Id">@displayName</option>
                     }
                 </select>
                 <span asp-validation-for="VisibilityId" class="text-danger"></span>
@@ -59,7 +65,7 @@
 </div>
 
 <script>
-    document.getElementById("previewUrl").addEventListener("input", function() {
+    document.getElementById("previewUrl").addEventListener("input", function () {
         var previewUrl = this.value;
         var previewImage = document.getElementById("previewImg");
 
