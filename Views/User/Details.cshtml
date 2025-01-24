@@ -29,7 +29,7 @@
             <p><strong>Полное имя:</strong> @Model.Fullname</p>
             <p><strong>О себе:</strong> @(Model.Bio ?? "Информация отсутствует")</p>
             <p><strong>Контактная информация:</strong> @(Model.Contactinfo ?? "Контактная информация отсутствует")</p>
-            <p><strong>Роль:</strong> @(Model.Role?.Name ?? "Роль не назначена")</p>
+            <p><strong>Роль:</strong> @(Model.Role?.Name == "Admin" ? "Администратор" : (Model.Role?.Name == "User" ? "Пользователь" : "Роль не назначена"))</p>
             <p><strong>Дата создания аккаунта:</strong> @Model.Createdat.ToString("yyyy-MM-dd HH:mm")</p>
             @if (Model.Updatedat.HasValue)
             {

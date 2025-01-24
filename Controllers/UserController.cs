@@ -158,14 +158,13 @@ namespace WebApplicationMVC.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Обновление аутентификационной информации для текущего пользователя
             if (currentUserId == targetUserId)
             {
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, existingUser.Username),
                     new Claim(ClaimTypes.Email, existingUser.Email),
-                    new Claim(ClaimTypes.Role, User.IsInRole("Admin") ? "Admin" : existingUser.Role?.Name ?? "User"), // Проверка на null
+                    new Claim(ClaimTypes.Role, existingUser.Role?.Name ?? "User"),
                     new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString())
                 };
 
@@ -174,6 +173,7 @@ namespace WebApplicationMVC.Controllers
 
                 await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
             }
+
 
             return RedirectToAction(nameof(Details), new { id = targetUserId });
         }
